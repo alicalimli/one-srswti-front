@@ -1,9 +1,12 @@
+import AppProviders from "./AppProviders";
 import AppRoutes from "./AppRoutes";
 
 function App() {
   return (
     <main className="bg-black">
-      <AppRoutes />;
+      <AppProviders>
+        <AppRoutes />
+      </AppProviders>
     </main>
   );
 }

@@ -161,6 +161,26 @@ export const getUser = () => async (dispatch: Dispatch) => {
   }
 };
 
+export const supabaseSignIn =
+  ({ email, password }: { email: string; password: string }) =>
+  async (dispatch: Dispatch) => {
+    dispatch(setSharedRequest("SUPABASE_SIGN_IN"));
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      dispatch(removeSharedRequest("SUPABASE_SIGN_IN"));
+    }
+  };
+
 export const googleSignIn = () => async (dispatch: Dispatch) => {
   dispatch(setSharedRequest("GOOGLE_SIGN_IN"));
   try {
