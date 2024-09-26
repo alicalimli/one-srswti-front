@@ -14,14 +14,14 @@ import { SubscriptionDataType, SUBSCRIPTIONS } from "@/lib/config";
 export const getUserProfile = () => async (dispatch: Dispatch) => {
   dispatch(setSharedRequest("GET_USER_PROFILE"));
   try {
-    const response = await fetch("/api/user-profile");
-    const responseJSON = await response.json();
+    // const response = await fetch("/api/user-profile");
+    // const responseJSON = await response.json();
 
-    if (responseJSON?.error) {
-      throw new Error(responseJSON.error);
-    }
+    // if (responseJSON?.error) {
+    //   throw new Error(responseJSON.error);
+    // }
 
-    dispatch(setUserReducerState({ profile: responseJSON }));
+    dispatch(setUserReducerState({ profile: {} }));
   } catch (error) {
     console.error("Error fetching user profile:", error);
   } finally {

@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { Separator } from '@/components/ui/separator'
-import { Loader2 } from 'lucide-react'
-import { useAppSelector } from '@/lib/hooks/use-redux'
-import { getUserState } from '@/lib/redux/slices/user'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { Textarea } from '../ui/textarea'
-import { updateUserProfile } from '@/lib/redux/action/userActions'
-import { MultiSelect } from '../ui/multi-select'
-import { USER_INTERESTS } from '@/lib/data/interests'
-import { MultiSelectType } from '@/lib/types'
+import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { Separator } from "@/components/ui/separator";
+import { Loader2 } from "lucide-react";
+import { useAppSelector } from "@/lib/hooks/use-redux";
+import { getUserState } from "@/lib/redux/slices/user";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { updateUserProfile } from "@/lib/redux/action/userActions";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { USER_INTERESTS } from "@/lib/data/interests";
+import { MultiSelectType } from "@/lib/types";
 
 import {
   Select,
@@ -19,79 +19,79 @@ import {
   SelectItem,
   SelectLabel,
   SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
-import { LANGUAGES, LanguageType } from '@/lib/data/languages'
-import { NYU_SCHOOLS } from '@/lib/data/nyuSchools'
-import { NYU_MAJORS } from '@/lib/data/dataMajors'
+  SelectValue,
+} from "@/components/ui/select";
+import { LANGUAGES } from "@/lib/data/languages";
+import { NYU_SCHOOLS } from "@/lib/data/nyuSchools";
+import { NYU_MAJORS } from "@/lib/data/dataMajors";
 
 const Profile = () => {
-  const dispatch = useDispatch()
-  const { user, nyuStudent, profile } = useAppSelector(getUserState)
+  const dispatch = useDispatch();
+  const { user, nyuStudent, profile } = useAppSelector(getUserState);
 
   const [formData, setFormData] = useState({
-    firstName: '',
+    firstName: "",
     interests: [] as MultiSelectType[],
-    lastName: '',
-    age: '',
-    preferredLanguage: '',
-    school: '',
-    description: '',
-    course: ''
-  })
+    lastName: "",
+    age: "",
+    preferredLanguage: "",
+    school: "",
+    description: "",
+    course: "",
+  });
 
-  const [isEdited, setIsEdited] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [isEdited, setIsEdited] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (profile) {
-      console.log(profile.preferredLanguage)
+      console.log(profile.preferredLanguage);
       setFormData({
         preferredLanguage: profile.preferredLanguage?.code,
-        course: profile.course || '',
-        firstName: profile.firstName || '',
-        lastName: profile.lastName || '',
-        age: profile.age?.toString() || '',
-        school: profile.school || '',
-        description: profile.description || '',
-        interests: profile.interests || []
-      })
+        course: profile.course || "",
+        firstName: profile.firstName || "",
+        lastName: profile.lastName || "",
+        age: profile.age?.toString() || "",
+        school: profile.school || "",
+        description: profile.description || "",
+        interests: profile.interests || [],
+      });
     }
-  }, [profile])
+  }, [profile]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setIsEdited(true)
+    setIsEdited(true);
 
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setIsEdited(false)
+    e.preventDefault();
+    setLoading(true);
+    setIsEdited(false);
 
     try {
       const lang = LANGUAGES.find(
-        l => l.code === formData.preferredLanguage
+        (l) => l.code === formData.preferredLanguage
       ) || {
-        code: '',
-        name: ''
-      }
+        code: "",
+        name: "",
+      };
 
       await dispatch(
         updateUserProfile({
           ...formData,
           age: parseInt(formData.age),
-          preferredLanguage: lang
+          preferredLanguage: lang,
         })
-      )
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
   return (
     <div className="space-y-6 ">
       <div>
@@ -153,10 +153,10 @@ const Profile = () => {
             </label>
             <Select
               value={formData.preferredLanguage}
-              onValueChange={val => {
-                if (!val) return
-                setIsEdited(true)
-                setFormData(state => ({ ...state, preferredLanguage: val }))
+              onValueChange={(val) => {
+                if (!val) return;
+                setIsEdited(true);
+                setFormData((state) => ({ ...state, preferredLanguage: val }));
               }}
             >
               <SelectTrigger className="w-full">
@@ -165,7 +165,7 @@ const Profile = () => {
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Languages</SelectLabel>
-                  {LANGUAGES.map(l => (
+                  {LANGUAGES.map((l) => (
                     <SelectItem key={l.code} value={l.code}>
                       {l.name}
                     </SelectItem>
@@ -183,8 +183,8 @@ const Profile = () => {
           <MultiSelect
             placeholder="Interests"
             initialSelections={profile?.interests || []}
-            setSelection={newData =>
-              setFormData(state => ({ ...state, interests: newData }))
+            setSelection={(newData) =>
+              setFormData((state) => ({ ...state, interests: newData }))
             }
             data={USER_INTERESTS}
           />
@@ -198,11 +198,11 @@ const Profile = () => {
           {nyuStudent ? (
             <Select
               value={formData.school}
-              onValueChange={val => {
-                if (!val) return
+              onValueChange={(val) => {
+                if (!val) return;
 
-                setIsEdited(true)
-                setFormData(state => ({ ...state, school: val }))
+                setIsEdited(true);
+                setFormData((state) => ({ ...state, school: val }));
               }}
             >
               <SelectTrigger className="w-full">
@@ -211,7 +211,7 @@ const Profile = () => {
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Schools</SelectLabel>
-                  {NYU_SCHOOLS.map(school => (
+                  {NYU_SCHOOLS.map((school) => (
                     <SelectItem key={school.id} value={school.name}>
                       {school.name}
                     </SelectItem>
@@ -238,11 +238,11 @@ const Profile = () => {
 
           <Select
             value={formData.course}
-            onValueChange={val => {
-              if (!val) return
+            onValueChange={(val) => {
+              if (!val) return;
 
-              setIsEdited(true)
-              setFormData(state => ({ ...state, course: val }))
+              setIsEdited(true);
+              setFormData((state) => ({ ...state, course: val }));
             }}
           >
             <SelectTrigger className="w-full">
@@ -251,7 +251,7 @@ const Profile = () => {
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Majors</SelectLabel>
-                {NYU_MAJORS.map(major => (
+                {NYU_MAJORS.map((major) => (
                   <SelectItem key={major.id} value={major.name}>
                     {major.name}
                   </SelectItem>
@@ -286,7 +286,7 @@ const Profile = () => {
         </Button>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default Profile
+export default Profile;

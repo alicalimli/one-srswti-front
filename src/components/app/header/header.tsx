@@ -23,6 +23,8 @@ import { useTour } from "@reactour/tour";
 import { useNavigate } from "react-router-dom";
 import SignIn from "@/pages/page-auth/signin";
 
+const AppSettings = React.lazy(() => import("./settings"));
+
 export const Header: React.FC = () => {
   const dispatch = useAppDispatch();
   const router = useNavigate();
@@ -74,7 +76,7 @@ export const Header: React.FC = () => {
         <div className="flex gap-2 items-center">
           <Dialog open={showSettings} onOpenChange={setShowSettings}>
             <DialogContent className="!w-[90%] md:p-12 md:pt-10 max-w-5xl min-h-[40rem] overflow-hidden">
-              {/* <AppSettings /> */}
+              <AppSettings />
 
               <div className="h-8"></div>
             </DialogContent>

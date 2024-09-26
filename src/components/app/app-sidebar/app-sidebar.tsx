@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import { IconHistory, IconMessage, IconStar } from "@tabler/icons-react";
 import { getReducerAppState } from "@/lib/redux/slices/sliceAppState";
+import { reduxGetChatHistory } from "@/lib/redux/action/chatActions";
 
 export default function AppSidebar({
   children,
@@ -37,7 +38,7 @@ export default function AppSidebar({
   const { focusMode } = useAppSelector(getReducerAppState);
 
   useEffect(() => {
-    // dispatch(reduxGetChatHistory(user?.id));
+    dispatch(reduxGetChatHistory(user?.id));
   }, [dispatch, user?.id]);
 
   const chats = reducerChatHistory;

@@ -1,34 +1,39 @@
-// import { Dispatch } from "@reduxjs/toolkit";
-// import { removeSharedRequest, setSharedRequest } from "../slices/shared";
-// import { setChatReducerState } from "../slices/chat";
-// import { toast } from "sonner";
-// import {
-//   getChat,
-//   saveChat,
-//   updateChat,
-//   getChats,
-//   clearChats,
-// } from "@/lib/actions/chat";
-// import { Chat } from "@/lib/types";
+import { Dispatch } from "@reduxjs/toolkit";
+import { removeSharedRequest, setSharedRequest } from "../slices/shared";
+import { setChatReducerState } from "../slices/chat";
+import { toast } from "sonner";
+import {
+  getChat,
+  saveChat,
+  updateChat,
+  getChats,
+  clearChats,
+} from "@/lib/actions/chat";
+import { Chat } from "@/lib/types";
 
-// export const reduxGetChat =
-//   (chatId: string, userId: string = "anonymous") =>
-//   async (dispatch: Dispatch) => {
-//     dispatch(setSharedRequest("GET_CHAT"));
-//     try {
-//       const chat = await getChat(chatId, userId);
+export const reduxGetChat =
+  (chatId: string, userId: string = "anonymous") =>
+  async (dispatch: Dispatch) => {
+    dispatch(setSharedRequest("GET_CHAT"));
+    try {
+      const response = await fetch(`http://localhost:3000/api/chats/${userId}`);
 
-//       if (!chat) {
-//         throw new Error("Chat not found");
-//       }
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const chat = await response.json();
 
-//       dispatch(setChatReducerState({ reducerChat: chat }));
-//     } catch (error) {
-//       console.error("Error fetching chat:", error);
-//     } finally {
-//       dispatch(removeSharedRequest("GET_CHAT"));
-//     }
-//   };
+      if (!chat) {
+        throw new Error("Chat not found");
+      }
+
+      dispatch(setChatReducerState({ reducerChat: chat }));
+    } catch (error) {
+      console.error("Error fetching chat:", error);
+    } finally {
+      dispatch(removeSharedRequest("GET_CHAT"));
+    }
+  };
 
 // export const reduxShareChat =
 //   (chatId: string, userId: string = "anonymous") =>
@@ -93,34 +98,43 @@
 //   dispatch(setChatReducerState({ reducerChat: null }));
 // };
 
-// export const reduxGetChatHistory =
-//   (userId: string = "anonymous") =>
-//   async (dispatch: Dispatch) => {
-//     dispatch(setSharedRequest("GET_CHAT_HISTORY"));
-//     try {
-//       const chats = await getChats(userId);
+export const reduxGetChatHistory =
+  (userId: string = "anonymous") =>
+  async (dispatch: Dispatch) => {
+    dispatch(setSharedRequest("GET_CHAT_HISTORY"));
+    try {
+      const response = await fetch(`http://localhost:3000/api/chats/${userId}`);
 
-//       // Convert Date objects to ISO strings
-//       const serializedChats = chats.map((chat) => ({
-//         ...chat,
-//         createdAt:
-//           chat.createdAt instanceof Date
-//             ? chat.createdAt.toISOString()
-//             : chat.createdAt,
-//         updatedAt:
-//           chat.updatedAt instanceof Date
-//             ? chat.updatedAt.toISOString()
-//             : chat.updatedAt,
-//       }));
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const chats = await response.json();
 
-//       dispatch(setChatReducerState({ reducerChatHistory: serializedChats }));
-//     } catch (error) {
-//       console.error("Error fetching chat history:", error);
-//       toast.error("Failed to load chat history");
-//     } finally {
-//       dispatch(removeSharedRequest("GET_CHAT_HISTORY"));
-//     }
-//   };
+      if (!chats) {
+        throw new Error("Chats not found");
+      }
+
+      // Convert Date objects to ISO strings
+      const serializedChats = chats.map((chat) => ({
+        ...chat,
+        createdAt:
+          chat.createdAt instanceof Date
+            ? chat.createdAt.toISOString()
+            : chat.createdAt,
+        updatedAt:
+          chat.updatedAt instanceof Date
+            ? chat.updatedAt.toISOString()
+            : chat.updatedAt,
+      }));
+
+      dispatch(setChatReducerState({ reducerChatHistory: serializedChats }));
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+      toast.error("Failed to load chat history");
+    } finally {
+      dispatch(removeSharedRequest("GET_CHAT_HISTORY"));
+    }
+  };
 
 // export const reduxClearChatHistory =
 //   (userId: string = "anonymous") =>
