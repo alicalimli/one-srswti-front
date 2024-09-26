@@ -1,30 +1,31 @@
 "use client";
 
-import SignIn from "@/app/(auth)/signin/signin";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
 import { signOut } from "@/lib/redux/action/userActions";
 import { getUserState } from "@/lib/redux/slices/user";
 import React, { useEffect, useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 // import { useAIActions } from '@/lib/hooks/use-ai-actions'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BookOpen, DollarSign, LogOutIcon, Settings } from "lucide-react";
 import {
   getReducerAppState,
   setAppStateReducer,
 } from "@/lib/redux/slices/sliceAppState";
 import { useTour } from "@reactour/tour";
+import { useNavigate } from "react-router-dom";
+import SignIn from "@/pages/page-auth/signin";
 
 export const Header: React.FC = () => {
   const dispatch = useAppDispatch();
-  const router = useRouter();
+  const router = useNavigate();
 
   const { user, nyuStudent } = useAppSelector(getUserState);
   const { setIsOpen } = useTour();
@@ -73,7 +74,7 @@ export const Header: React.FC = () => {
         <div className="flex gap-2 items-center">
           <Dialog open={showSettings} onOpenChange={setShowSettings}>
             <DialogContent className="!w-[90%] md:p-12 md:pt-10 max-w-5xl min-h-[40rem] overflow-hidden">
-              <AppSettings />
+              {/* <AppSettings /> */}
 
               <div className="h-8"></div>
             </DialogContent>

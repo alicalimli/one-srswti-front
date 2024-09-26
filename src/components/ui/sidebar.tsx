@@ -1,9 +1,8 @@
 import { cn } from "@/lib/utils";
-import Link, { LinkProps } from "next/link";
 import React, { useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { IconMenu2, IconX } from "@tabler/icons-react";
-import { usePathname } from "next/navigation";
+import { Link, LinkProps, useLocation } from "react-router-dom";
 
 interface Links {
   label: string;
@@ -112,46 +111,44 @@ export const MobileSidebar = ({
 }: React.ComponentProps<"div">) => {
   const { open, setOpen } = useSidebar();
   return (
-    <>
-      <div
-        className={cn(
-          "h-10 px-4 py-4 flex flex-row md:hidden  items-center justify-between bg-primary/20 w-full"
-        )}
-        {...props}
-      >
-        <div className="flex justify-end z-20 w-full">
-          <IconMenu2
-            className="text-neutral-800 dark:text-neutral-200"
-            onClick={() => setOpen(!open)}
-          />
-        </div>
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              initial={{ x: "-100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "-100%", opacity: 0 }}
-              transition={{
-                duration: 0.3,
-                ease: "easeInOut",
-              }}
-              className={cn(
-                "fixed h-full w-full inset-0 bg-bg-primary/50 backdrop-blur-lg p-10 z-[100] flex flex-col justify-between",
-                className
-              )}
-            >
-              <div
-                className="absolute right-10 top-10 z-50 text-neutral-800 dark:text-neutral-200"
-                onClick={() => setOpen(!open)}
-              >
-                <IconX />
-              </div>
-              {children}
-            </motion.div>
-          )}
-        </AnimatePresence>
+    <div
+      className={cn(
+        "h-10 px-4 py-4 flex flex-row md:hidden  items-center justify-between bg-primary/20 w-full"
+      )}
+      {...props}
+    >
+      <div className="flex justify-end z-20 w-full">
+        <IconMenu2
+          className="text-neutral-800 dark:text-neutral-200"
+          onClick={() => setOpen(!open)}
+        />
       </div>
-    </>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ x: "-100%", opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: "-100%", opacity: 0 }}
+            transition={{
+              duration: 0.3,
+              ease: "easeInOut",
+            }}
+            className={cn(
+              "fixed h-full w-full inset-0 bg-bg-primary/50 backdrop-blur-lg p-10 z-[100] flex flex-col justify-between",
+              className
+            )}
+          >
+            <div
+              className="absolute right-10 top-10 z-50 text-neutral-800 dark:text-neutral-200"
+              onClick={() => setOpen(!open)}
+            >
+              <IconX />
+            </div>
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
@@ -166,12 +163,12 @@ export const SidebarLink = ({
 }) => {
   const { open, animate } = useSidebar();
 
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   const isActive = pathname === link.href;
 
   return (
     <Link
-      href={link.href}
+      to={link.href}
       className={cn(
         "flex items-center justify-start gap-2  group/sidebar py-2 pl-1.5 rounded active:scale-[0.98] duration-200",
         className,

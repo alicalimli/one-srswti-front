@@ -1,0 +1,55 @@
+@keyframes textLag {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-1px, -1px);
+  }
+  50% {
+    transform: translate(1px, 1px);
+  }
+  75% {
+    transform: translate(-1px, 1px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+.text-lag {
+  animation: textLag 0.5s steps(1) infinite;
+}
+
+.collapsible-wrapper {
+  overflow-y: hidden;
+}
+
+.collapsible-content {
+  transition: height 300ms ease-out;
+}
+
+.collapsible-content[data-state="open"] {
+  animation: slideDown 300ms ease-out;
+}
+
+.collapsible-content[data-state="closed"] {
+  animation: slideUp 300ms ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    height: var(--radix-collapsible-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
