@@ -1,84 +1,69 @@
-import { LLM_INFERENCE, SRSWTI_INFERENCE_NO_BS } from "@/lib/config";
-import { decodeApiData, encodeAPIData } from "./encoder-decoder";
+import axios from "axios";
+import { cryptoDecryptData, cryptoEncryptData } from "./encoder-decoder";
 
 export const srswtiInference = async ({
-  question = "",
   history = [],
-  endpoint = SRSWTI_INFERENCE_NO_BS,
-  withBs64 = false,
-  extraPayload = {},
+  maxOutputTokens = 4096,
+  shouldFail,
 }: {
-  question?: string;
-  history?: { content: string; role: "assistant" | "user" }[];
-  endpoint?: string;
-  withBs64?: boolean;
-  extraPayload?: Record<string, any>;
+  history: { content: string; role: "assistant" | "user" }[];
+  maxOutputTokens?: number;
+  shouldFail?: boolean;
 }) => {
-  const sendRequest = async (assistantType: "srswti-fast" | "flash") => {
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
+  const raw = {
+    ramanujanModel: "ramanujan-l2",
+    rest: {
+      max_tokens: maxOutputTokens,
+      messages: history,
+    },
+  };
 
-    const messageObject = {
-      message: question,
-      assistant_type: assistantType,
-      user_id: "ebee54f3-7691-4e3c-a895-a7d7a508af7a",
-      llm_chathistory: [...history],
-      ...extraPayload,
-    };
+  const urls = [
+    "https://router.srswti.com/rene/ren",
+    "https://router.srswti.com/ram/rinf",
+  ];
+  const makeRequest = async (encrypt) => {
+    if (shouldFail) {
+      throw new Error("error");
+    }
 
-    const base64Data = encodeAPIData(messageObject);
+    const url = encrypt ? urls[0] : urls[1];
+    const data = encrypt
+      ? { encryptedData: cryptoEncryptData(JSON.stringify(raw)) }
+      : raw;
 
     const requestOptions = {
       method: "POST",
-      headers: myHeaders,
-      body: {},
-      redirect: "follow",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(data),
+      url,
     };
 
-    let response;
+    const response = await axios(requestOptions);
 
-    if (withBs64) {
-      const APIRes = await fetch(
-        `${endpoint}?ed=${base64Data}`,
-        requestOptions
-      );
+    if (response.status !== 200) throw new Error("Request failed");
 
-      const responseJSON = await APIRes.json();
+    const res = response.data;
+    const resultData = encrypt
+      ? JSON.parse(cryptoDecryptData(res.encryptedData))
+      : res;
 
-      response = decodeApiData(responseJSON.response);
-    } else {
-      const requestOptions = {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(messageObject),
-      };
+    console.log(resultData);
 
-      const APIRes = await fetch(`${endpoint}`, requestOptions);
-
-      const responseJSON = await APIRes.json();
-      response = responseJSON.response;
-    }
-
-    return response;
+    return resultData?.content[0]?.text;
   };
 
   try {
-    const model = endpoint === LLM_INFERENCE ? "flash" : "srswti-fast";
-
-    const response = await sendRequest(model);
-    return {
-      response,
-    };
+    return await makeRequest(true);
   } catch (error) {
-    console.log(error);
-
-    const model = endpoint === LLM_INFERENCE ? "srswti-fast" : "flash";
-
-    const response = await sendRequest(model);
-    return {
-      response,
-    };
+    console.error("Encrypted request failed:", error);
+    try {
+      return await makeRequest(false);
+    } catch (secondError) {
+      console.error("Unencrypted request failed:", secondError);
+      throw new Error(secondError);
+    }
   }
 };

@@ -30,11 +30,11 @@ const threadSlice = createSlice({
     },
     appendThreadMessage: (
       state,
-      action: PayloadAction<ThreadMessageGroupType>
+      action: PayloadAction<ThreadMessageGroupType[]>
     ) => {
       return {
         ...state,
-        messageGroups: [...state.messageGroups, action.payload],
+        messageGroups: [...state.messageGroups, ...action.payload],
       };
     },
   },

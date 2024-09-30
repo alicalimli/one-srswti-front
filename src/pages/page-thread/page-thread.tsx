@@ -3,8 +3,10 @@ import ThreadMessages from "@/components/app/thread-messages/thread-messages";
 import { WritingSkeleton } from "@/components/app/writing-skeleton/writing-skeleton";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
 import { reduxSendQuery } from "@/lib/redux/action/actions-thread";
-import { clearThread, getThreadState } from "@/lib/redux/slices/slice-thread";
+import { getThreadState } from "@/lib/redux/slices/slice-thread";
+import { ThreadMessageGroupType } from "@/lib/types";
 import { useEffect, useRef } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
 
 const PageThread = ({}) => {
@@ -34,11 +36,18 @@ const PageThread = ({}) => {
     if (!input || !input.value.trim()?.length) return;
 
     try {
-      dispatch(reduxSendQuery(input.value));
+      const groupChat: ThreadMessageGroupType = {
+        id: uuidv4(),
+        query: "",
+        transformedQuery: "",
+        messages: [{ role: "user", content: input.value }],
+      };
+
+      dispatch(reduxSendQuery({ query: input.value, messages: [groupChat] }));
 
       setTimeout(() => {
         navigate("/thread");
-        inputRef.current.value = "";
+        input.value = "";
       }, 0);
     } catch (e) {
       console.log(e);

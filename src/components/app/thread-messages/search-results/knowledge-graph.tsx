@@ -179,7 +179,7 @@ const KnowledgeGraphContent = ({
 }: KnowledgeGraphContentProps) => {
   const results = searchResult;
   const [showFullScreen, setshowFullScreen] = useState(false);
-
+  console.log(searchResult);
   const [edges, setEdges] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [activeSummary, setActiveSummary] =

@@ -14,14 +14,11 @@ export async function duckDuckGoSearch({
 }): Promise<SearchResults> {
   const apiUrl = DUCKDUCKGO_API_URL;
 
-  console.log("SEARCHING>", apiUrl);
   if (!apiUrl) {
     throw new Error(
       "DUCKDUCKGO_API_URL is not set in the environment variables"
     );
   }
-
-  console.log("SEARCHING>");
 
   try {
     let endpoint = "/ddgs_search";
@@ -60,7 +57,6 @@ export async function duckDuckGoSearch({
 
     const batchSize = 5;
     for (let i = 0; i < maxResults; i += batchSize) {
-      console.log("BATCH");
       const batch = data.text_results.slice(i, i + batchSize);
       await Promise.all(
         batch.map(async (result, index) => {

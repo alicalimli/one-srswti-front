@@ -8,14 +8,10 @@ import { ChatInput } from "@/components/app/chat-input/chat-input";
 import { ChatPanelLogo } from "./chat-panel-logo";
 import { FormEncType, useNavigate } from "react-router-dom";
 import { reduxSendQuery } from "@/lib/redux/action/actions-thread";
+import { ThreadMessageGroupType } from "@/lib/types";
+import { v4 as uuidv4 } from "uuid";
 
-interface ChatPanelProps {
-  messages: UIState;
-  query?: string;
-  focusMode: boolean;
-}
-
-export function ChatPanel({}: ChatPanelProps) {
+export function ChatPanel() {
   const navigate = useNavigate();
 
   const hoveredMode = useAppSelector((state) => state.appState.hoveredMode);
@@ -59,7 +55,14 @@ export function ChatPanel({}: ChatPanelProps) {
     // }
 
     try {
-      dispatch(reduxSendQuery(initialQuery));
+      const groupChat: ThreadMessageGroupType = {
+        query: "",
+        id: uuidv4(),
+        transformedQuery: "",
+        messages: [{ role: "user", content: initialQuery }],
+      };
+
+      dispatch(reduxSendQuery({ query: initialQuery, messages: [groupChat] }));
 
       setTimeout(() => {
         navigate("/thread");

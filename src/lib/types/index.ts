@@ -1,3 +1,4 @@
+import { InquiryType } from "@/components/app/thread-messages/inquire/inquire";
 import { LanguageType } from "../data/languages";
 
 export type SearchResults = {
@@ -37,13 +38,16 @@ export type SearchResultWebsite = {
 };
 
 export type ThreadMessageGroupType = {
+  id: string;
+  type?: "inquiry" | "default";
+  inquiry?: InquiryType;
   query: string;
   transformedQuery: string;
   messages: ThreadMessage[];
 };
 
 export type ThreadMessage = {
-  type: "knowledge-graph" | "text";
+  role: "knowledge-graph" | "text" | "user" | "assistant";
   content: string | SearchResults;
 };
 

@@ -7,7 +7,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import MarkdownMessage from "./markdown-message/markdown-message";
-import { memo, useEffect, useState } from "react";
+import { memo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Copilot } from "./inquire/inquire";
 
 interface ThreadMessageProps {
   messageGroup: ThreadMessageGroupType;
@@ -16,6 +18,12 @@ interface ThreadMessageProps {
 
 const ThreadMessage = ({ messageGroup, groupIndex }: ThreadMessageProps) => {
   const [open, setOpen] = useState("item-1");
+
+  if (messageGroup?.type === "inquiry" && messageGroup?.inquiry) {
+    return <Copilot inquiry={messageGroup?.inquiry} id={messageGroup?.id} />;
+  }
+
+  if (!messageGroup?.query) return <></>;
 
   return (
     <Accordion
@@ -30,7 +38,7 @@ const ThreadMessage = ({ messageGroup, groupIndex }: ThreadMessageProps) => {
         </AccordionTrigger>
         <AccordionContent className="space-y-5">
           {messageGroup.messages.map((message, messageIndex) => {
-            switch (message.type) {
+            switch (message.role) {
               case "knowledge-graph": {
                 if (typeof message.content === "string") return <></>;
 
@@ -50,11 +58,7 @@ const ThreadMessage = ({ messageGroup, groupIndex }: ThreadMessageProps) => {
                   />
                 );
               default:
-                return (
-                  <div key={`message-${groupIndex}-${messageIndex}`}>
-                    Unknown message type
-                  </div>
-                );
+                return <></>;
             }
           })}
         </AccordionContent>
@@ -72,15 +76,27 @@ interface ThreadMessagesProps {
 const ThreadMessages = ({ messageGroups }: ThreadMessagesProps) => {
   const renderMessages = () => {
     return messageGroups.map((messageGroup, groupIndex) => (
-      <MemoizedThreadMessage
-        key={`thread-message-${groupIndex}`}
-        messageGroup={messageGroup}
-        groupIndex={groupIndex}
-      />
+      <motion.li
+        key={messageGroup?.id}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        layout
+      >
+        <MemoizedThreadMessage
+          key={`thread-message-${groupIndex}`}
+          messageGroup={messageGroup}
+          groupIndex={groupIndex}
+        />
+      </motion.li>
     ));
   };
 
-  return <div>{renderMessages()}</div>;
+  return (
+    <AnimatePresence>
+      <ul className="flex flex-col gap-4">{renderMessages()}</ul>
+    </AnimatePresence>
+  );
 };
 
 export default ThreadMessages;

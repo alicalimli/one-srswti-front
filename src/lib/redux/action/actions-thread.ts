@@ -7,6 +7,9 @@ import { ThreadMessageGroupType } from "@/lib/types";
 import { store } from "../store";
 import { transformUserQuery } from "@/lib/ai-agents/transform-user-query";
 import getSearchAnswer from "@/lib/ai-agents/get-search-answer";
+import { getStructuredResultContext } from "@/lib/utils/get-structured-result-context";
+import shouldInquire from "@/lib/ai-agents/should-inquire";
+import { InquiryType } from "@/components/app/thread-messages/inquire/inquire";
 
 export const reduxBookmarkThread = () => async (dispatch: Dispatch) => {
   dispatch(setSharedRequest("BOOKMARK_THREAD"));
@@ -32,43 +35,150 @@ export const reduxShareThread = () => async (dispatch: Dispatch) => {
   }
 };
 
-export const reduxSendQuery = (query: string) => async (dispatch: Dispatch) => {
-  const currentThreadID = store.getState().thread?.id;
+const getUserAssitantMessages = (history: ThreadMessageGroupType[]) => {
+  return history.flatMap((group) =>
+    group.messages.filter(
+      (msg) => msg.role === "user" || msg.role === "assistant"
+    )
+  );
+};
 
-  dispatch(setSharedRequest("SEND_QUERY"));
+const removeInquireBlocks = (
+  history: ThreadMessageGroupType[],
+  inquireIDS: string[]
+) => {
+  if (!inquireIDS?.length) {
+    return history;
+  }
+  return history.filter((group) => !inquireIDS.includes(group.id));
+};
 
-  try {
-    const threadID = currentThreadID || uuidv4();
+let inquireCount = 0;
 
-    dispatch(setThreadState({ id: threadID, status: "generating" }));
+const checkInquiry = async ({
+  historyContext,
+  query,
+  skipInquire,
+}: {
+  historyContext: string;
+  query: string;
+  skipInquire?: boolean;
+}) => {
+  const maxInquiries = 3;
 
-    const transformedQuery = await transformUserQuery(query);
+  const shouldRenderInquire:
+    | { choices: string[]; question: string }
+    | "proceed" =
+    inquireCount <= maxInquiries
+      ? await shouldInquire({
+          context: historyContext,
+        })
+      : "proceed";
 
-    const searchResults = await duckDuckGoSearch({
-      query: transformedQuery,
-      maxResults: 2,
-    });
+  if (!skipInquire && shouldRenderInquire !== "proceed") {
+    inquireCount++;
 
-    const answer = await getSearchAnswer({ searchResults });
-
-    const messageObject: ThreadMessageGroupType = {
-      query,
-      transformedQuery,
-      messages: [
-        {
-          type: "knowledge-graph",
-          content: searchResults,
-        },
-        { type: "text", content: answer },
-      ],
+    const dummyInquiry: InquiryType = {
+      question: shouldRenderInquire.question,
+      choices: shouldRenderInquire.choices,
+      userQuery: query,
+      allowsInput: true,
+      inputLabel: "Other (please specify)",
+      inputPlaceholder: "Type your answer here...",
     };
 
-    dispatch(appendThreadMessage(messageObject));
-  } catch (error) {
-    console.error("Error in reduxSendQuery:", error);
-    dispatch(setThreadState({ status: "error" }));
-  } finally {
-    dispatch(setThreadState({ status: "idle" }));
-    dispatch(removeSharedRequest("SEND_QUERY"));
+    const inquiryBlock: ThreadMessageGroupType = {
+      id: uuidv4(),
+      type: "inquiry",
+      inquiry: dummyInquiry,
+      query: "",
+      transformedQuery: "",
+      messages: [],
+    };
+
+    return { inquiryBlock };
   }
+
+  inquireCount = 0;
+  return { inquiryBlock: null };
 };
+
+export const reduxSendQuery =
+  ({
+    query,
+    messages,
+    skipInquire,
+    inquireIDS,
+  }: {
+    query: string;
+    skipInquire?: boolean;
+    messages: ThreadMessageGroupType[];
+    inquireIDS?: string[];
+  }) =>
+  async (dispatch: Dispatch) => {
+    const currentThreadID = store.getState().thread?.id;
+    const currentMessages = store.getState().thread?.messageGroups;
+
+    dispatch(setSharedRequest("SEND_QUERY"));
+
+    try {
+      const threadID = currentThreadID || uuidv4();
+
+      dispatch(setThreadState({ id: threadID, status: "generating" }));
+
+      let history = [...currentMessages, ...messages];
+      history = inquireIDS ? removeInquireBlocks(history, inquireIDS) : history;
+
+      const historyContext = `
+      Here's is the message history of the user and their query:
+      ${JSON.stringify(getUserAssitantMessages(history))}
+    `;
+
+      const { inquiryBlock } = await checkInquiry({
+        historyContext,
+        query,
+        skipInquire,
+      });
+
+      if (inquiryBlock) {
+        history.push(inquiryBlock);
+        dispatch(setThreadState({ messageGroups: history }));
+        return;
+      }
+
+      const transformedQuery = await transformUserQuery({
+        query,
+        historyContext,
+      });
+
+      const searchResults = await duckDuckGoSearch({
+        query: transformedQuery,
+        maxResults: 5,
+      });
+      const resultContext = getStructuredResultContext(searchResults);
+
+      const answer = await getSearchAnswer({ context: resultContext });
+
+      const messageObject: ThreadMessageGroupType = {
+        id: uuidv4(),
+        query,
+        transformedQuery,
+        messages: [
+          {
+            role: "knowledge-graph",
+            content: searchResults,
+          },
+          { role: "text", content: answer },
+        ],
+      };
+
+      history.push(messageObject);
+      dispatch(setThreadState({ messageGroups: history }));
+    } catch (error) {
+      console.error("Error in reduxSendQuery:", error);
+      dispatch(setThreadState({ status: "error" }));
+    } finally {
+      dispatch(setThreadState({ status: "idle" }));
+      dispatch(removeSharedRequest("SEND_QUERY"));
+    }
+  };

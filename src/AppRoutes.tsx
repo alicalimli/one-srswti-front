@@ -13,7 +13,6 @@ const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<>HELLO</>} />
         <Route
           element={
             <AppLayout>
@@ -23,6 +22,7 @@ const AppRoutes = () => {
         >
           <Route path="/thread" element={<PageThread />} />
           <Route path="/search" element={<PageSearch />} />
+          <Route path="/" element={<PageSearch />} />
         </Route>
         <Route path="/signin" element={<PageAuth />} />
       </Routes>
