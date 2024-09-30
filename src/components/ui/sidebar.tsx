@@ -88,11 +88,11 @@ export const DesktopSidebar = ({
     <>
       <motion.div
         className={cn(
-          "h-full px-4 py-4 hidden  md:flex md:flex-col bg-primary/40 border-r border-white/20 w-[300px] flex-shrink-0",
+          "h-full px-4 py-4 hidden md:flex md:flex-col  border-r border-white/20 w-[300px] bg-bg-primary flex-shrink-0",
           className
         )}
         animate={{
-          width: animate ? (open ? "300px" : "60px") : "300px",
+          width: animate ? (open ? "300px" : "70px") : "300px",
         }}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
@@ -155,11 +155,15 @@ export const MobileSidebar = ({
 export const SidebarLink = ({
   link,
   className,
+  hideIcon,
+  onClick,
   ...props
 }: {
   link: Links;
   className?: string;
+  hideIcon?: boolean;
   props?: LinkProps;
+  onClick?: () => void;
 }) => {
   const { open, animate } = useSidebar();
 
@@ -168,15 +172,18 @@ export const SidebarLink = ({
 
   return (
     <Link
+      onClick={() => {
+        onClick?.();
+      }}
       to={link.href}
       className={cn(
         "flex items-center justify-start gap-2  group/sidebar py-2 pl-1.5 rounded active:scale-[0.98] duration-200",
         className,
-        isActive ? "bg-primary" : "bg-transparent"
+        isActive && open ? "bg-primary" : "bg-transparent"
       )}
       {...props}
     >
-      {link.icon}
+      {hideIcon && !open ? <></> : link.icon}
 
       <motion.span
         animate={{

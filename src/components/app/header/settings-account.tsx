@@ -1,12 +1,14 @@
-import React, { useState } from 'react'
-import { Separator } from '@/components/ui/separator'
-import { useAppSelector } from '@/lib/hooks/use-redux'
-import { getUserState } from '@/lib/redux/slices/user'
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
+import { signOut } from "@/lib/redux/action/userActions";
+import { useState } from "react";
 
 const AccountSettings = ({}) => {
-  const { user } = useAppSelector(getUserState)
+  const user = useAppSelector((state) => state.user.user);
 
-  const [username, setUsername] = useState(user?.user_metadata?.username || '')
+  const dispatch = useAppDispatch();
+  const [username, setUsername] = useState(user?.user_metadata?.username || "");
 
   return (
     <div className="space-y-6">
@@ -30,8 +32,12 @@ const AccountSettings = ({}) => {
           {user?.email}
         </div>
       </div>
-    </div>
-  )
-}
 
-export default AccountSettings
+      <Button onClick={() => dispatch(signOut())} variant="destructive">
+        Sign Out
+      </Button>
+    </div>
+  );
+};
+
+export default AccountSettings;

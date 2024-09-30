@@ -1,31 +1,25 @@
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
 import { getUser } from "@/lib/redux/action/userActions";
-import { getSharedState } from "@/lib/redux/slices/shared";
 import { getUserState } from "@/lib/redux/slices/user";
 import { AnimatePresence, motion } from "framer-motion";
 
-import React, { ReactNode, useEffect, useState } from "react";
-import VideoPlayer from "@/components/ui/video-player";
-import { BackgroundGradientAnimation } from "@/components/ui/bg-gradient";
 import Billing from "@/components/app/billing-dialog/billing-dialog";
+import { BackgroundGradientAnimation } from "@/components/ui/bg-gradient";
+import VideoPlayer from "@/components/ui/video-player";
+import { ReactNode, useEffect } from "react";
 import AppSidebar from "../app-sidebar/app-sidebar";
-
-// const Onboarding = dynamic(() => import("@/components/onboarding/onboarding"), {
-//   ssr: false,
-// });
 
 interface BootAnimation {
   children: ReactNode;
 }
 
 export default function BootAnimation({ children }: BootAnimation) {
-  const { isAnonymous, nyuStudent, user } = useAppSelector(getUserState);
-
-  const { sharedRequest } = useAppSelector(getSharedState);
+  const { isAnonymous, nyuStudent, profile, user } =
+    useAppSelector(getUserState);
 
   const dispatch = useAppDispatch();
 
-  const authenticating = sharedRequest.includes("GET_REQUEST");
+  const authenticating = isAnonymous === null;
 
   const showChildren = isAnonymous !== null;
 
@@ -51,12 +45,12 @@ export default function BootAnimation({ children }: BootAnimation) {
           >
             <VideoPlayer
               src="https://api.srswti.com/storage/v1/object/public/srswti-one-public/bg-windows.mp4?t=2024-09-25T16%3A07%3A00.140Z"
-              className=" h-[100svh] w-[50svw] object-contain brightness-20"
+              className=" h-[100svh] w-[50svw] object-cover brightness-20"
             />
 
             <VideoPlayer
               src="https://api.srswti.com/storage/v1/object/public/srswti-one-public/bg-windows.mp4?t=2024-09-25T16%3A07%3A00.140Z"
-              className=" h-[100svh] w-[50svw] object-contain brightness-20 scale-x-[-1]"
+              className=" h-[100svh] w-[50svw] object-cover brightness-20 scale-x-[-1]"
             />
 
             <span className="absolute right-6 top-6 text-black uppercase font-mono text-sm animate-pulse">
@@ -65,8 +59,8 @@ export default function BootAnimation({ children }: BootAnimation) {
           </motion.div>
         )}
       </AnimatePresence>
-      {showChildren && !authenticating && (
-        <AppSidebar user={user}>
+      {showChildren && !authenticating && user && profile && (
+        <AppSidebar user={user} profile={profile}>
           <motion.div
             initial={{ opacity: 0 }}
             className="w-full h-full"

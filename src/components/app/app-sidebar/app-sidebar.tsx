@@ -1,9 +1,8 @@
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
-// import {
-//   reduxClearChatHistory,
-//   reduxGetChatHistory,
-// } from "@/lib/redux/action/chatActions";
-import { getChatReducerState } from "@/lib/redux/slices/chat";
+import {
+  // reduxClearChatHistory,
+  reduxGetChatHistory,
+} from "@/lib/redux/action/chatActions";
 import { cn } from "@/lib/utils";
 import { User } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
@@ -21,71 +20,97 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
-import { IconHistory, IconMessage, IconStar } from "@tabler/icons-react";
-import { getReducerAppState } from "@/lib/redux/slices/sliceAppState";
-import { reduxGetChatHistory } from "@/lib/redux/action/chatActions";
+import {
+  IconArrowLeft,
+  IconCreditCard,
+  IconHelpCircle,
+  IconHistory,
+  IconMessage,
+  IconSettings,
+  IconStar,
+} from "@tabler/icons-react";
+import { setAppStateReducer } from "@/lib/redux/slices/sliceAppState";
+import { ProfileType } from "@/lib/types";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import AppSettings from "@/components/app/header/settings";
+import { useTour } from "@reactour/tour";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AppSidebar({
   children,
   user,
+  profile,
 }: {
+  profile: ProfileType;
   user: User;
   children: ReactNode;
 }) {
   const dispatch = useAppDispatch();
 
-  const { reducerChatHistory } = useAppSelector(getChatReducerState);
-  const { focusMode } = useAppSelector(getReducerAppState);
+  const reducerChatHistory = useAppSelector(
+    (state) => state.chat.reducerChatHistory
+  );
+  const focusMode = useAppSelector((state) => state.appState.focusMode);
+  const [currentPage, setCurrentPage] = useState<
+    "home" | "bookmarks" | "shared" | "history"
+  >("home");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    dispatch(reduxGetChatHistory(user?.id));
-  }, [dispatch, user?.id]);
+    const getChats = async () => {
+      if (currentPage !== "home") {
+        try {
+          !reducerChatHistory?.length && setLoading(true);
+          await dispatch(reduxGetChatHistory(user?.id));
+        } catch (error) {
+          console.error("Error fetching chat history:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    getChats();
+  }, [currentPage, dispatch, user?.id]);
 
   const chats = reducerChatHistory;
 
   const bookmarks = chats?.filter((chat) => chat.bookmarked);
-  const unbookmarks = chats?.filter((chat) => !chat.bookmarked);
+  const shared = chats?.filter((chat) => chat.shared);
+  const history = chats?.filter((chat) => !chat.bookmarked && !chat.shared);
 
-  const bookmarksLinks = bookmarks.map((c) => ({
-    label: c.title,
-    href: c.path,
-    icon: (
-      <IconMessage className="text-neutral-700 dark:text-neutral-200 size-4 opacity-60 flex-shrink-0" />
-    ),
-  }));
+  const getLinksForCurrentPage = () => {
+    const links = {
+      bookmarks: bookmarks.map((c) => ({
+        label: c.title,
+        href: c.path,
+        icon: (
+          <IconStar className="text-neutral-700 dark:text-neutral-200 size-4 opacity-60 flex-shrink-0" />
+        ),
+      })),
+      shared: shared.map((c) => ({
+        label: c.title,
+        href: c.path,
+        icon: (
+          <IconMessage className="text-neutral-700 dark:text-neutral-200 size-4 opacity-60 flex-shrink-0" />
+        ),
+      })),
+      history: history.map((c) => ({
+        label: c.title,
+        href: c.path,
+        icon: (
+          <IconMessage className="text-neutral-700 dark:text-neutral-200 size-4 opacity-60 flex-shrink-0" />
+        ),
+      })),
+    };
 
-  const chatLinks = unbookmarks.map((c) => ({
-    label: c.title,
-    href: c.path,
-    icon: (
-      <IconMessage className="text-neutral-700 dark:text-neutral-200 size-4 opacity-60 flex-shrink-0" />
-    ),
-  }));
-
-  const links = [
-    ...(bookmarks.length > 0
-      ? [
-          {
-            label: "Bookmarks",
-            href: "",
-            icon: (
-              <IconStar className="text-neutral-700 dark:text-neutral-200 size-4 opacity-60 flex-shrink-0" />
-            ),
-          },
-          ...bookmarksLinks,
-        ]
-      : []),
-    {
-      label: "Recent Chats",
-      href: "",
-      icon: (
-        <IconHistory className="text-neutral-700 dark:text-neutral-200 size-4 opacity-60 flex-shrink-0" />
-      ),
-    },
-    ...chatLinks,
-  ];
+    return links[currentPage] || [];
+  };
 
   const [open, setOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const { setIsOpen } = useTour();
 
   return (
     <div
@@ -94,13 +119,22 @@ export default function AppSidebar({
         "h-[100svh]"
       )}
     >
+      <Dialog open={showSettings && user} onOpenChange={setShowSettings}>
+        <DialogContent className="!w-[90%] md:p-12 md:pt-10 max-w-5xl min-h-[40rem] overflow-hidden">
+          <AppSettings />
+          <div className="h-8"></div>
+        </DialogContent>
+      </Dialog>
+
       <div
-        className={`duration-500 ${focusMode ? "opacity-20" : "opacity-100"}`}
+        className={`duration-500 ${focusMode ? "opacity-10" : "opacity-100"}`}
       >
         {user && (
           <Sidebar open={open} setOpen={setOpen}>
-            <SidebarBody className={`justify-between gap-10 px-4 md:relative `}>
-              {open && (
+            <SidebarBody
+              className={`justify-between gap-10 px-4 md:relative z-10`}
+            >
+              {currentPage === "history" && open && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button
@@ -140,9 +174,133 @@ export default function AppSidebar({
               )}
               <div className="flex flex-col flex-1 overflow-y-auto scrollbar-hide overflow-x-hidden">
                 <div className="flex flex-col gap-2">
-                  {links.map((link, idx) => (
-                    <SidebarLink key={idx} link={link} />
-                  ))}
+                  {currentPage !== "home" ? (
+                    <>
+                      {loading ? (
+                        <div className="flex flex-col gap-2">
+                          {Array.from({ length: 10 }).map((_, index) => (
+                            <Skeleton key={index} className="h-6 w-full mb-1" />
+                          ))}
+                        </div>
+                      ) : (
+                        <>
+                          <SidebarLink
+                            onClick={() => setCurrentPage("home")}
+                            hideIcon={true}
+                            link={{
+                              label: "Back",
+                              href: "",
+                              icon: (
+                                <IconArrowLeft className="opacity-80 size-4 ml-1" />
+                              ),
+                            }}
+                          />
+                          {getLinksForCurrentPage().length > 0 ? (
+                            getLinksForCurrentPage().map((link, idx) => (
+                              <SidebarLink
+                                key={idx}
+                                link={link}
+                                hideIcon={true}
+                              />
+                            ))
+                          ) : (
+                            <SidebarLink
+                              link={{
+                                label: `  No ${currentPage} available`,
+                                href: "",
+                                icon: <></>,
+                              }}
+                              className="text-center text-gray-500 mt-4"
+                            ></SidebarLink>
+                          )}
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <div>
+                      <SidebarLink
+                        link={{
+                          label: profile?.firstName + " " + profile?.lastName,
+                          href: "",
+                          icon: (
+                            <Avatar className="size-8">
+                              <AvatarImage
+                                src={user?.user_metadata?.picture}
+                                alt="@shadcn"
+                              />
+                              <AvatarFallback>
+                                {user?.email?.slice(0, 2) || "U"}
+                              </AvatarFallback>
+                            </Avatar>
+                          ),
+                        }}
+                      />
+                      <SidebarLink
+                        onClick={() => {
+                          dispatch(setAppStateReducer({ showBilling: true }));
+                        }}
+                        link={{
+                          label: "Billing",
+                          href: "",
+                          icon: (
+                            <IconCreditCard className="opacity-80 size-5 ml-1" />
+                          ),
+                        }}
+                      />
+                      <SidebarLink
+                        onClick={() => setCurrentPage("bookmarks")}
+                        link={{
+                          label: "Bookmarks",
+                          href: "",
+                          icon: <IconStar className="opacity-80 size-5 ml-1" />,
+                        }}
+                      />
+                      <SidebarLink
+                        onClick={() => setCurrentPage("shared")}
+                        link={{
+                          label: "Shared",
+                          href: "",
+                          icon: (
+                            <IconMessage className="opacity-80 size-5 ml-1" />
+                          ),
+                        }}
+                      />
+                      <SidebarLink
+                        onClick={() => setCurrentPage("history")}
+                        link={{
+                          label: "Chat History",
+                          href: "",
+                          icon: (
+                            <IconHistory className="opacity-80 size-5 ml-1" />
+                          ),
+                        }}
+                      />
+                      <SidebarLink
+                        onClick={() => {
+                          setIsOpen(true);
+                        }}
+                        link={{
+                          label: "Tutorial",
+                          href: "",
+                          icon: (
+                            <IconHelpCircle className="opacity-80 size-5 ml-1" />
+                          ),
+                        }}
+                      />
+                      <SidebarLink
+                        onClick={() => {
+                          setShowSettings(true);
+                        }}
+                        link={{
+                          label: "Settings",
+                          href: "",
+                          icon: (
+                            <IconSettings className="opacity-80 size-5 ml-1" />
+                          ),
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </SidebarBody>
@@ -150,7 +308,7 @@ export default function AppSidebar({
         )}
       </div>
 
-      <div className="flex flex-1">{children}</div>
+      <div className="flex flex-1 relative">{children}</div>
     </div>
   );
 }
