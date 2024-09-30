@@ -1,12 +1,18 @@
-import { LLM_INFERENCE } from "@/lib/config";
+import { LLM_INFERENCE, SRSWTI_INFERENCE_NO_BS } from "@/lib/config";
 import { decodeApiData, encodeAPIData } from "./encoder-decoder";
 
 export const srswtiInference = async ({
   question = "",
   history = [],
-  endpoint = LLM_INFERENCE,
+  endpoint = SRSWTI_INFERENCE_NO_BS,
   withBs64 = false,
   extraPayload = {},
+}: {
+  question?: string;
+  history?: { content: string; role: "assistant" | "user" }[];
+  endpoint?: string;
+  withBs64?: boolean;
+  extraPayload?: Record<string, any>;
 }) => {
   const sendRequest = async (assistantType: "srswti-fast" | "flash") => {
     const myHeaders = new Headers();
@@ -48,7 +54,9 @@ export const srswtiInference = async ({
         },
         body: JSON.stringify(messageObject),
       };
+
       const APIRes = await fetch(`${endpoint}`, requestOptions);
+
       const responseJSON = await APIRes.json();
       response = responseJSON.response;
     }
@@ -60,7 +68,6 @@ export const srswtiInference = async ({
     const model = endpoint === LLM_INFERENCE ? "flash" : "srswti-fast";
 
     const response = await sendRequest(model);
-
     return {
       response,
     };

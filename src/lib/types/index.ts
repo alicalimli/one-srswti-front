@@ -1,128 +1,72 @@
-import { LanguageType } from '../data/languages'
+import { LanguageType } from "../data/languages";
 
 export type SearchResults = {
-  images: SearchResultImage[]
-  results: SearchResultItem[]
-  number_of_results?: number
-  query: string
-  youtubeResults: SearchResultItem[]
-  searchType: string
-}
+  text_results: Array<SearchResultWebsite>;
+  image_results: Array<SearchResultImage>;
+  video_results: Array<SearchResultVideos>;
+};
 
-// If enabled the include_images_description is true, the images will be an array of { url: string, description: string }
-// Otherwise, the images will be an array of strings
-export type SearchResultImage =
-  | string
-  | {
-      url: string
-      description: string
-      number_of_results?: number
-    }
+export type SearchResultVideos = {
+  content: string;
+  description: string;
+  duration: string;
+  embed_html: string;
+  title: string;
+  published: string;
+  publisher: string;
+  embed_url: string;
+  images: { medium: string };
+};
 
-export type ExaSearchResults = {
-  results: ExaSearchResultItem[]
-}
+export type SearchResultImage = {
+  image: string;
+  title: string;
+  height: number;
+  width: number;
+  thumbnail: string;
+  url: string;
+  source: string;
+};
 
-export type SerperSearchResults = {
-  searchParameters: {
-    q: string
-    type: string
-    engine: string
-  }
-  videos: SerperSearchResultItem[]
-}
+export type SearchResultWebsite = {
+  title: string;
+  body: string;
+  href: string;
+  summary?: string;
+  keywords?: string[];
+};
 
-export type SearchResultItem = {
-  title: string
-  url: string
-  thumbnailSRC?: string
-  content: string
-}
+export type ThreadMessageGroupType = {
+  query: string;
+  transformedQuery: string;
+  messages: ThreadMessage[];
+};
 
-export type ExaSearchResultItem = {
-  score: number
-  title: string
-  id: string
-  url: string
-  publishedDate: Date
-  author: string
-}
-
-export type SerperSearchResultItem = {
-  title: string
-  link: string
-  snippet: string
-  imageUrl: string
-  duration: string
-  source: string
-  channel: string
-  date: string
-  position: number
-}
+export type ThreadMessage = {
+  type: "knowledge-graph" | "text";
+  content: string | SearchResults;
+};
 
 export interface Chat extends Record<string, any> {
-  id: string
-  title: string
-  createdAt: Date
-  userId: string
-  path: string
-  bookmarked: boolean
-  shared: boolean
-  messages: AIMessage[]
-  sharePath?: string
-}
-
-export type AIMessage = {
-  role: 'user' | 'assistant' | 'system' | 'function' | 'data' | 'tool'
-  content: string
-  id: string
-  name?: string
-  type?:
-    | 'answer'
-    | 'related'
-    | 'skip'
-    | 'inquiry'
-    | 'input'
-    | 'input_related'
-    | 'tool'
-    | 'followup'
-    | 'end'
-}
-
-export interface SearXNGResult {
-  title: string
-  url: string
-  content: string
-  thumbnail?: string
-  img_src?: string
-  publishedDate?: string
-  score?: number
-}
-
-export interface SearXNGResponse {
-  query: string
-  number_of_results: number
-  results: SearXNGResult[]
-}
-
-export type SearXNGImageResult = string
-
-export type SearXNGSearchResults = {
-  images: SearXNGImageResult[]
-  results: SearchResultItem[]
-  number_of_results?: number
-  query: string
+  id: string;
+  title: string;
+  createdAt: Date;
+  userId: string;
+  path: string;
+  bookmarked: boolean;
+  shared: boolean;
+  sharePath?: string;
 }
 
 export interface ProfileType {
-  firstName: string
-  lastName: string
-  course: string
-  preferredLanguage: LanguageType
-  age: number
-  school: string
-  description: string
-  interests: MultiSelectType[]
+  firstName: string;
+  lastName: string;
+  course: string;
+  preferredLanguage: LanguageType;
+  age: number;
+  school: string;
+  description: string;
+  interests: MultiSelectType[];
 }
 
-export type MultiSelectType = { id: number; value: string; label: string }
+export type MultiSelectType = { id: number; value: string; label: string };

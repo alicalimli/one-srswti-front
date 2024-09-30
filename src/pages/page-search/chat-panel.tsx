@@ -39,7 +39,7 @@ export function ChatPanel({}: ChatPanelProps) {
 
     const initialQuery = inputRef?.current?.value;
 
-    if (!initialQuery) return;
+    if (!initialQuery?.trim()?.length) return;
 
     // if (dontAllowSearch) {
     //   try {
@@ -60,7 +60,10 @@ export function ChatPanel({}: ChatPanelProps) {
 
     try {
       dispatch(reduxSendQuery(initialQuery));
-      navigate("/thread");
+
+      setTimeout(() => {
+        navigate("/thread");
+      }, 0);
     } catch (e) {
       console.log(e);
     }

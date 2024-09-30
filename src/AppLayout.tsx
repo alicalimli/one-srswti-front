@@ -14,10 +14,8 @@ const AppLayout = ({ children }: AppLayoutProps) => {
       <BootAnimation>
         <ReactTour>
           <main className="flex flex-col h-[100svh] w-screen">
-            <ScrollArea className="flex-grow">
-              <Header />
-              {children}
-            </ScrollArea>
+            <Header />
+            <ScrollArea className="flex-grow">{children}</ScrollArea>
           </main>
         </ReactTour>
       </BootAnimation>

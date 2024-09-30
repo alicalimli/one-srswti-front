@@ -1,6 +1,12 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { setSharedRequest, removeSharedRequest } from "../slices/slice-shared";
-import { setThreadState } from "../slices/slice-thread";
+import { appendThreadMessage, setThreadState } from "../slices/slice-thread";
+import { duckDuckGoSearch } from "@/lib/api/api-search";
+import { v4 as uuidv4 } from "uuid";
+import { ThreadMessageGroupType } from "@/lib/types";
+import { store } from "../store";
+import { transformUserQuery } from "@/lib/ai-agents/transform-user-query";
+import getSearchAnswer from "@/lib/ai-agents/get-search-answer";
 
 export const reduxBookmarkThread = () => async (dispatch: Dispatch) => {
   dispatch(setSharedRequest("BOOKMARK_THREAD"));
@@ -27,32 +33,37 @@ export const reduxShareThread = () => async (dispatch: Dispatch) => {
 };
 
 export const reduxSendQuery = (query: string) => async (dispatch: Dispatch) => {
+  const currentThreadID = store.getState().thread?.id;
+
   dispatch(setSharedRequest("SEND_QUERY"));
+
   try {
-    dispatch(setThreadState({ status: "loading" }));
-    console.log("reduxSendQuery action called with query:", query);
+    const threadID = currentThreadID || uuidv4();
 
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    dispatch(setThreadState({ id: threadID, status: "generating" }));
 
-    // const fetchResponse = async () => {
-    //   if (initialQuery) {
-    //     try {
-    //       const res = await srswtiInference({
-    //         question: initialQuery,
-    //         withBs64: false,
-    //         extraPayload: {
-    //           user_id: "ebee54f3-7691-4e3c-a895-a7d7a508af7a", // You might want to replace this with actual user ID
-    //         },
-    //       });
+    const transformedQuery = await transformUserQuery(query);
 
-    //       console.log(res);
-    //     } catch (error) {
-    //       console.error("Error fetching response:", error);
-    //     }
-    //   }
-    // };
+    const searchResults = await duckDuckGoSearch({
+      query: transformedQuery,
+      maxResults: 2,
+    });
 
-    // fetchResponse();
+    const answer = await getSearchAnswer({ searchResults });
+
+    const messageObject: ThreadMessageGroupType = {
+      query,
+      transformedQuery,
+      messages: [
+        {
+          type: "knowledge-graph",
+          content: searchResults,
+        },
+        { type: "text", content: answer },
+      ],
+    };
+
+    dispatch(appendThreadMessage(messageObject));
   } catch (error) {
     console.error("Error in reduxSendQuery:", error);
     dispatch(setThreadState({ status: "error" }));
