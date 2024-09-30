@@ -1,4 +1,4 @@
-import { setAppStateReducer } from "@/lib/redux/slices/sliceAppState";
+import { setAppStateReducer } from "@/lib/redux/slices/slice-app-state";
 import { TourProvider, useTour } from "@reactour/tour";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";

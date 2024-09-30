@@ -7,7 +7,7 @@ import { getUserState } from "@/lib/redux/slices/user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { updateUserProfile } from "@/lib/redux/action/userActions";
+import { updateUserProfile } from "@/lib/redux/action/actions-user";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { USER_INTERESTS } from "@/lib/data/interests";
 import { MultiSelectType } from "@/lib/types";

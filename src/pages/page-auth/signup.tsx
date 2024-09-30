@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2Icon } from "lucide-react";
-import { getUser, googleSignIn, signIn } from "@/lib/redux/action/userActions";
+import { getUser, googleSignIn, signIn } from "@/lib/redux/action/actions-user";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
-import { getSharedState } from "@/lib/redux/slices/shared";
+import { getSharedState } from "@/lib/redux/slices/slice-shared";
 import { IconBrandGoogle } from "@tabler/icons-react";
 
 const signUpSchema = z

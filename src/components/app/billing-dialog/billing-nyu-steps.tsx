@@ -3,7 +3,7 @@ import { MultiStepLoader as Loader } from "@/components/ui/multi-step-loader";
 import { IconSquareRoundedX } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch } from "@/lib/hooks/use-redux";
-import { googleSignIn, signOut } from "@/lib/redux/action/userActions";
+import { googleSignIn, signOut } from "@/lib/redux/action/actions-user";
 
 interface BillingNyuStepsProps {
   show: boolean;

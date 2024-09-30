@@ -1,6 +1,13 @@
 export const SUPABASE_KEY = import.meta.env.VITE_APP_SB_KEY;
 export const SUPABASE_URL = import.meta.env.VITE_APP_SB_URL;
 
+export const BASE_API_URL = import.meta.env.VITE_APP_BASE_API_URL;
+export const LLM_INFERENCE = `${BASE_API_URL}/ram/rinf`;
+export const BLOCKNOTE_API = `${BASE_API_URL}/notlikeus/ncomp`;
+
+export const AES_KEY = import.meta.env.VITE_APP_AES_KEY;
+export const AES_IV = import.meta.env.VITE_APP_AES_IV;
+
 export const SUBSCRIPTIONS = {
   prod_QszYxKauDLWIQO: {
     name: "SRSWTI ONE PREMIUM",

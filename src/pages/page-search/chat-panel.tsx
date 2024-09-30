@@ -1,5 +1,5 @@
 import { LLM_MODES } from "@/lib/data/dataModes";
-import { useAppSelector } from "@/lib/hooks/use-redux";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
 import { getUserState } from "@/lib/redux/slices/user";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
@@ -7,6 +7,7 @@ import { ChatFadeEnter } from "@/components/ui/chat-fade-enter";
 import { ChatInput } from "@/components/app/chat-input/chat-input";
 import { ChatPanelLogo } from "./chat-panel-logo";
 import { FormEncType, useNavigate } from "react-router-dom";
+import { reduxSendQuery } from "@/lib/redux/action/actions-thread";
 
 interface ChatPanelProps {
   messages: UIState;
@@ -23,6 +24,7 @@ export function ChatPanel({}: ChatPanelProps) {
 
   const { nyuStudent, subscription, profile } = useAppSelector(getUserState);
 
+  const dispatch = useAppDispatch();
   const copilotPlaceholder = LLM_MODES.find((l) => l.id === hoveredMode);
 
   const placeholder = focusMode && copilotPlaceholder?.placeholder;
@@ -57,7 +59,8 @@ export function ChatPanel({}: ChatPanelProps) {
     // }
 
     try {
-      navigate("/thread", { state: { initialQuery } });
+      dispatch(reduxSendQuery(initialQuery));
+      navigate("/thread");
     } catch (e) {
       console.log(e);
     }

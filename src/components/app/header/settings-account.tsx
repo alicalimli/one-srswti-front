@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
-import { signOut } from "@/lib/redux/action/userActions";
+import { signOut } from "@/lib/redux/action/actions-user";
 import { useState } from "react";
 
 const AccountSettings = ({}) => {

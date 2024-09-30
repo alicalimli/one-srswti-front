@@ -1,5 +1,5 @@
 import { Dispatch } from "@reduxjs/toolkit";
-import { removeSharedRequest, setSharedRequest } from "../slices/shared";
+import { removeSharedRequest, setSharedRequest } from "../slices/slice-shared";
 import {
   initialUserState,
   setUserReducerState,

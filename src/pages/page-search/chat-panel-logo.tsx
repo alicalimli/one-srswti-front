@@ -7,7 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { setAppStateReducer } from "@/lib/redux/slices/sliceAppState";
+import { setAppStateReducer } from "@/lib/redux/slices/slice-app-state";
 import { useAppDispatch } from "@/lib/hooks/use-redux";
 
 interface ChatPanelLogoProps {

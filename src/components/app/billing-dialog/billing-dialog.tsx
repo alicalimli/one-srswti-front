@@ -2,7 +2,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
 import {
   getReducerAppState,
   setAppStateReducer,
-} from "@/lib/redux/slices/sliceAppState";
+} from "@/lib/redux/slices/slice-app-state";
 import { getUserState } from "@/lib/redux/slices/user";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Loader2, CheckIcon } from "lucide-react";
@@ -11,7 +11,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import BillingNyuSteps from "./billing-nyu-steps";
-import { googleSignIn } from "@/lib/redux/action/userActions";
+import { googleSignIn } from "@/lib/redux/action/actions-user";
 import { supabase } from "@/lib/supabase/supabase";
 
 const BillingDialog = () => {

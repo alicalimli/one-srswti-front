@@ -9,7 +9,7 @@ import {
   getUser,
   googleSignIn,
   supabaseSignIn,
-} from "@/lib/redux/action/userActions";
+} from "@/lib/redux/action/actions-user";
 import { IconBrandGoogle } from "@tabler/icons-react";
 
 interface SignInProps {}

@@ -1,6 +1,6 @@
 import { Dispatch } from "@reduxjs/toolkit";
-import { removeSharedRequest, setSharedRequest } from "../slices/shared";
-import { setChatReducerState } from "../slices/chat";
+import { removeSharedRequest, setSharedRequest } from "../slices/slice-shared";
+import { setChatReducerState } from "../slices/slice-user-threads";
 import { toast } from "sonner";
 import {
   getChat,

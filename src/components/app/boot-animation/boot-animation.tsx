@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
-import { getUser } from "@/lib/redux/action/userActions";
+import { getUser } from "@/lib/redux/action/actions-user";
 import { getUserState } from "@/lib/redux/slices/user";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -59,7 +59,7 @@ export default function BootAnimation({ children }: BootAnimation) {
           </motion.div>
         )}
       </AnimatePresence>
-      {showChildren && !authenticating && user && profile && (
+      {showChildren && !authenticating && (
         <AppSidebar user={user} profile={profile}>
           <motion.div
             initial={{ opacity: 0 }}

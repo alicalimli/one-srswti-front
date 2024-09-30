@@ -1,14 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userSlice from "./slices/user";
-import sharedSlice from "./slices/shared";
-import chatSlice from "./slices/chat";
-import appStateSlice from "./slices/sliceAppState";
-
+import sharedSlice from "./slices/slice-shared";
+import userThreadsSlice from "./slices/slice-user-threads";
+import appStateSlice from "./slices/slice-app-state";
+import threadSlice from "./slices/slice-thread";
 export const store = configureStore({
   reducer: {
     user: userSlice,
     shared: sharedSlice,
-    chat: chatSlice,
+    chat: userThreadsSlice,
+    thread: threadSlice,
     appState: appStateSlice,
   },
 });

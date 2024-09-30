@@ -12,7 +12,7 @@ const initialChatState: ChatState = {
   reducerChatHistory: [],
 };
 
-const chatSlice = createSlice({
+const userThreadsSlice = createSlice({
   name: "chat",
   initialState: initialChatState,
   reducers: {
@@ -22,6 +22,6 @@ const chatSlice = createSlice({
   },
 });
 
-export const { setChatReducerState } = chatSlice.actions;
+export const { setChatReducerState } = userThreadsSlice.actions;
 export const getChatReducerState = (state: RootState) => state.chat;
-export default chatSlice.reducer;
+export default userThreadsSlice.reducer;

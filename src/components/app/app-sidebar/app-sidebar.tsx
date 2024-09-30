@@ -2,7 +2,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
 import {
   // reduxClearChatHistory,
   reduxGetChatHistory,
-} from "@/lib/redux/action/chatActions";
+} from "@/lib/redux/action/actions-user-threads";
 import { cn } from "@/lib/utils";
 import { User } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
@@ -29,7 +29,7 @@ import {
   IconSettings,
   IconStar,
 } from "@tabler/icons-react";
-import { setAppStateReducer } from "@/lib/redux/slices/sliceAppState";
+import { setAppStateReducer } from "@/lib/redux/slices/slice-app-state";
 import { ProfileType } from "@/lib/types";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import AppSettings from "@/components/app/header/settings";

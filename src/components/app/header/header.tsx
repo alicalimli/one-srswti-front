@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useAppSelector } from "@/lib/hooks/use-redux";
-import { getReducerAppState } from "@/lib/redux/slices/sliceAppState";
+import { getReducerAppState } from "@/lib/redux/slices/slice-app-state";
 import { getUserState } from "@/lib/redux/slices/user";
 import SignIn from "@/pages/page-auth/signin";
 import React, { useEffect, useState } from "react";

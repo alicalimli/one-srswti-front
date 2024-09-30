@@ -169,15 +169,33 @@ export const SidebarLink = ({
 
   const { pathname } = useLocation();
   const isActive = pathname === link.href;
+  return onClick ? (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex items-center justify-start gap-2 group/sidebar py-2 pl-1.5 rounded active:scale-[0.98] duration-200",
+        className,
+        isActive && open ? "bg-primary" : "bg-transparent"
+      )}
+      {...props}
+    >
+      {hideIcon && !open ? <></> : link.icon}
 
-  return (
+      <motion.span
+        animate={{
+          display: animate ? (open ? "inline-block" : "none") : "inline-block",
+          opacity: animate ? (open ? 1 : 0) : 1,
+        }}
+        className="text-neutral-700 dark:text-neutral-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0"
+      >
+        {link.label}
+      </motion.span>
+    </button>
+  ) : (
     <Link
-      onClick={() => {
-        onClick?.();
-      }}
       to={link.href}
       className={cn(
-        "flex items-center justify-start gap-2  group/sidebar py-2 pl-1.5 rounded active:scale-[0.98] duration-200",
+        "flex items-center justify-start gap-2 group/sidebar py-2 pl-1.5 rounded active:scale-[0.98] duration-200",
         className,
         isActive && open ? "bg-primary" : "bg-transparent"
       )}
