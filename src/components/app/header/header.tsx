@@ -5,13 +5,15 @@ import { getReducerAppState } from "@/lib/redux/slices/sliceAppState";
 import { getUserState } from "@/lib/redux/slices/user";
 import SignIn from "@/pages/page-auth/signin";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const Header: React.FC = () => {
+  const navigate = useNavigate();
+
   const { user, nyuStudent } = useAppSelector(getUserState);
+  const { isGenerating } = useAppSelector(getReducerAppState);
 
   const [showSignin, setShowSignin] = useState(false);
-
-  const { isGenerating } = useAppSelector(getReducerAppState);
 
   useEffect(() => {
     if (user) {
@@ -23,7 +25,7 @@ export const Header: React.FC = () => {
     <header className="w-full p-4 border-b border-white/10  z-50 flex items-center ">
       <button
         disabled={isGenerating}
-        onClick={() => {}}
+        onClick={() => navigate("/search")}
         className="duration-300 hover:opacity-50"
       >
         {nyuStudent ? (

@@ -26,7 +26,7 @@ export default function BootAnimation({ children }: BootAnimation) {
   useEffect(() => {
     const timer = setTimeout(() => {
       dispatch(getUser());
-    }, 3500);
+    }, 1000);
     return () => clearTimeout(timer);
   }, []);
 
