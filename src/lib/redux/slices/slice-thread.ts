@@ -28,6 +28,18 @@ const threadSlice = createSlice({
     clearThread: () => {
       return initialThreadState;
     },
+    updateThreadMessage: (
+      state,
+      action: PayloadAction<ThreadMessageGroupType>
+    ) => {
+      const updatedMessageGroups = state.messageGroups.map((group) =>
+        group.id === action.payload.id ? action.payload : group
+      );
+      return {
+        ...state,
+        messageGroups: updatedMessageGroups,
+      };
+    },
     appendThreadMessage: (
       state,
       action: PayloadAction<ThreadMessageGroupType[]>
@@ -40,7 +52,11 @@ const threadSlice = createSlice({
   },
 });
 
-export const { setThreadState, clearThread, appendThreadMessage } =
-  threadSlice.actions;
+export const {
+  setThreadState,
+  updateThreadMessage,
+  clearThread,
+  appendThreadMessage,
+} = threadSlice.actions;
 export const getThreadState = (state: RootState) => state.thread;
 export default threadSlice.reducer;

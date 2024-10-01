@@ -218,18 +218,46 @@ export const reduxSendQuery =
 
       if (!shouldContinue()) return;
 
-      console.log("Performing DuckDuckGo search");
+      const messageGroupID = uuidv4();
+
+      let messageObject: ThreadMessageGroupType = {
+        id: messageGroupID,
+        user_id: currentUser?.id || "anonymous",
+        query,
+        thread_id: threadID,
+        transformed_query,
+        messages: [
+          {
+            role: "knowledge-graph",
+            content: {
+              image_results: [],
+              text_results: [],
+              video_results: [],
+            },
+          },
+        ],
+      };
+
+      console.log("Appending new message to thread");
+      newMessages.push(messageObject);
+      dispatch(appendThreadMessage(newMessages));
+
       const searchType = focusMode && llmMode === "social" ? "news" : "general";
 
       const searchResults = await duckDuckGoSearch({
         searchType,
         quickSearch: false,
+        dispatch,
+        messageObject,
+
         query: transformed_query,
         maxResults: focusMode ? 1 : 1,
       });
-      const resultContext = getStructuredResultContext(searchResults);
 
+      return;
       if (!shouldContinue()) return;
+
+      const resultContext = getStructuredResultContext(searchResults);
 
       console.log("Getting search answer");
       const answer = await getSearchAnswer({
@@ -239,28 +267,7 @@ export const reduxSendQuery =
 
       if (!shouldContinue()) return;
 
-      const messageObject: ThreadMessageGroupType = {
-        id: uuidv4(),
-        user_id: currentUser?.id || "anonymous",
-        query,
-        thread_id: threadID,
-        transformed_query,
-        messages: [
-          {
-            role: "knowledge-graph",
-            content: searchResults,
-          },
-          { role: "text", content: answer },
-        ],
-      };
-
-      console.log("Appending new message to thread");
-      newMessages.push(messageObject);
-
-      if (shouldContinue()) {
-        await insertMessagesToDB({ messages: newMessages });
-        dispatch(appendThreadMessage(newMessages));
-      }
+      await insertMessagesToDB({ messages: newMessages });
     } catch (error) {
       console.error("Error in reduxSendQuery:", error);
       if (shouldContinue()) {

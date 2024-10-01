@@ -1,12 +1,23 @@
+import { Dispatch } from "@reduxjs/toolkit";
 import { DUCKDUCKGO_API_URL } from "../config";
-import { NewsResult, SearchResults, SearchResultWebsite } from "../types";
+import {
+  NewsResult,
+  SearchResults,
+  SearchResultWebsite,
+  ThreadMessageGroupType,
+} from "../types";
+import { updateThreadMessage } from "../redux/slices/slice-thread";
 
 export async function duckDuckGoSearch({
   query,
   maxResults,
   searchType,
   quickSearch,
+  messageObject,
+  dispatch,
 }: {
+  dispatch: Dispatch;
+  messageObject: ThreadMessageGroupType;
   searchType?: "general" | "news";
   query: string;
   quickSearch?: boolean;
@@ -79,9 +90,17 @@ export async function duckDuckGoSearch({
 
     const resultsSimulation: SearchResultWebsite[] = [];
 
+    let content = {
+      image_results: [],
+      text_results: [],
+      video_results: [],
+    };
+
     const batchSize = 5;
+
     for (let i = 0; i < maxResults; i += batchSize) {
       const batch = data.text_results.slice(i, i + batchSize);
+
       await Promise.all(
         batch.map(async (result, index) => {
           const payload = JSON.stringify({
@@ -117,6 +136,15 @@ export async function duckDuckGoSearch({
             keywords: websiteWithSummary?.keywords || [],
           };
 
+          content.text_results.push(adaptedResult);
+          console.log("updating", content);
+          const newMessageObject = {
+            ...messageObject,
+            content,
+          };
+          console.log("obj", newMessageObject);
+
+          dispatch(updateThreadMessage(newMessageObject));
           resultsSimulation.push(adaptedResult);
         })
       );
