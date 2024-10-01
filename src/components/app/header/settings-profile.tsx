@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
@@ -25,9 +25,12 @@ import { LANGUAGES } from "@/lib/data/languages";
 import { NYU_SCHOOLS } from "@/lib/data/nyuSchools";
 import { NYU_MAJORS } from "@/lib/data/dataMajors";
 
+const MemoizedMultiSelect = React.memo(MultiSelect);
+const MemoizedSelectItem = React.memo(SelectItem);
+
 const Profile = () => {
   const dispatch = useDispatch();
-  const { user, nyuStudent, profile } = useAppSelector(getUserState);
+  const { nyuStudent, profile } = useAppSelector(getUserState);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -45,9 +48,8 @@ const Profile = () => {
 
   useEffect(() => {
     if (profile) {
-      console.log(profile.preferredLanguage);
       setFormData({
-        preferredLanguage: profile.preferredLanguage?.code,
+        preferredLanguage: profile.preferredLanguage?.code || "",
         course: profile.course || "",
         firstName: profile.firstName || "",
         lastName: profile.lastName || "",
@@ -59,14 +61,14 @@ const Profile = () => {
     }
   }, [profile]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setIsEdited(true);
-
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+      setIsEdited(true);
+    },
+    []
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,8 +94,23 @@ const Profile = () => {
       setLoading(false);
     }
   };
+
+  const handleSelectChange = useCallback((name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setIsEdited(true);
+  }, []);
+
+  const handleInterestsChange = useCallback((newData: MultiSelectType[]) => {
+    setFormData((prev) => ({ ...prev, interests: newData }));
+    setIsEdited(true);
+  }, []);
+
+  const memoizedLanguages = useMemo(() => LANGUAGES, []);
+  const memoizedNyuSchools = useMemo(() => NYU_SCHOOLS, []);
+  const memoizedNyuMajors = useMemo(() => NYU_MAJORS, []);
+
   return (
-    <div className="space-y-6 ">
+    <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">Profile</h3>
         <p className="text-sm text-muted-foreground">
@@ -102,7 +119,7 @@ const Profile = () => {
       </div>
       <Separator />
 
-      <form onSubmit={handleSubmit} className="space-y-4 ">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-x-4 flex items-center">
           <div className="flex flex-col gap-2 w-full">
             <label htmlFor="firstName" className="text-sm font-medium">
@@ -148,16 +165,14 @@ const Profile = () => {
             />
           </div>
           <div className="flex flex-col gap-2 w-full">
-            <label htmlFor="lastName" className="text-sm font-medium">
+            <label htmlFor="preferredLanguage" className="text-sm font-medium">
               Preferred Language
             </label>
             <Select
               value={formData.preferredLanguage}
-              onValueChange={(val) => {
-                if (!val) return;
-                setIsEdited(true);
-                setFormData((state) => ({ ...state, preferredLanguage: val }));
-              }}
+              onValueChange={(val) =>
+                handleSelectChange("preferredLanguage", val)
+              }
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Preferred Language" />
@@ -165,10 +180,10 @@ const Profile = () => {
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Languages</SelectLabel>
-                  {LANGUAGES.map((l) => (
-                    <SelectItem key={l.code} value={l.code}>
+                  {memoizedLanguages.map((l) => (
+                    <MemoizedSelectItem key={l.code} value={l.code}>
                       {l.name}
-                    </SelectItem>
+                    </MemoizedSelectItem>
                   ))}
                 </SelectGroup>
               </SelectContent>
@@ -180,12 +195,10 @@ const Profile = () => {
           <label htmlFor="interests" className="text-sm font-medium">
             What are your interests?
           </label>
-          <MultiSelect
+          <MemoizedMultiSelect
             placeholder="Interests"
-            initialSelections={profile?.interests || []}
-            setSelection={(newData) =>
-              setFormData((state) => ({ ...state, interests: newData }))
-            }
+            initialSelections={formData.interests}
+            setSelection={handleInterestsChange}
             data={USER_INTERESTS}
           />
         </div>
@@ -198,12 +211,7 @@ const Profile = () => {
           {nyuStudent ? (
             <Select
               value={formData.school}
-              onValueChange={(val) => {
-                if (!val) return;
-
-                setIsEdited(true);
-                setFormData((state) => ({ ...state, school: val }));
-              }}
+              onValueChange={(val) => handleSelectChange("school", val)}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="School" />
@@ -211,10 +219,10 @@ const Profile = () => {
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Schools</SelectLabel>
-                  {NYU_SCHOOLS.map((school) => (
-                    <SelectItem key={school.id} value={school.name}>
+                  {memoizedNyuSchools.map((school) => (
+                    <MemoizedSelectItem key={school.id} value={school.name}>
                       {school.name}
-                    </SelectItem>
+                    </MemoizedSelectItem>
                   ))}
                 </SelectGroup>
               </SelectContent>
@@ -238,12 +246,7 @@ const Profile = () => {
 
           <Select
             value={formData.course}
-            onValueChange={(val) => {
-              if (!val) return;
-
-              setIsEdited(true);
-              setFormData((state) => ({ ...state, course: val }));
-            }}
+            onValueChange={(val) => handleSelectChange("course", val)}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Major" />
@@ -251,7 +254,7 @@ const Profile = () => {
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Majors</SelectLabel>
-                {NYU_MAJORS.map((major) => (
+                {memoizedNyuMajors.map((major) => (
                   <SelectItem key={major.id} value={major.name}>
                     {major.name}
                   </SelectItem>
@@ -289,4 +292,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default React.memo(Profile);

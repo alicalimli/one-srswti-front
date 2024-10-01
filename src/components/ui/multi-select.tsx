@@ -145,3 +145,5 @@ export function MultiSelect({
     </Command>
   );
 }
+
+export const MemoizedMultiSelect = React.memo(MultiSelect);
