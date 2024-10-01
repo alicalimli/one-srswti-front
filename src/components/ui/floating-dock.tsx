@@ -66,7 +66,7 @@ export const FloatingDock = ({
         ))}
       </div>
 
-      <div className="md:block hidden gap-4">
+      <div className="hidden gap-2 w-fit md:flex items-end">
         {items.map((item) => (
           <IconContainer
             handleMouseIn={handleMouseIn}

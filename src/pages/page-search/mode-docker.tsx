@@ -22,8 +22,13 @@ export function ModeDocker() {
   const [open, setOpen] = useState(false);
 
   const handleClick = (item) => {
-    dispatch(setAppStateReducer({ activeMode: item.id, hoveredMode: item.id }));
-    setOpen(false);
+    // MUST BE IN TIMEOUT TO CALL IT IN THE NEXT CALL STACK
+    setTimeout(() => {
+      dispatch(
+        setAppStateReducer({ activeMode: item.id, hoveredMode: item.id })
+      );
+      setOpen(false);
+    }, 0);
   };
 
   const activeButton = LLM_MODES.find((l) => l.id === activeMode);

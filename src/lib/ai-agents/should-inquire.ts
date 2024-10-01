@@ -25,10 +25,13 @@ const shouldInquire = async ({ context, llmMode }: ShouldInquireProps) => {
 
       If you want to proceed, respond with "proceed" only. If you want to inquire, you will return a JSON object with the following structure without any other text:
 
+      Always provide choices that the user can select from as well.
+
+      For example:
       {
         "inquire": {
           "question": "What specific information or topic are you looking for?",
-          "choices": []
+          "choices": ["science", "technology", "health", "business", "sports", "entertainment", "other"]
         }
       }
 

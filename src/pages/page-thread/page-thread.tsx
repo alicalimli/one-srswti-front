@@ -28,36 +28,31 @@ const PageThread = () => {
 
   const { threadID: existingThreadID } = useParams<{ threadID: string }>();
   const { status } = useAppSelector(getThreadState);
-  const tr = useAppSelector(getThreadState);
 
   const dispatch = useAppDispatch();
-  const isAnExistingThread = !!existingThreadID;
-
-  console.log(tr);
-  console.log(existingThreadID);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const initializeThread = () => {
-    // Existing thread means user opened a thread from the thread list not new threa
-
-    if (existingThreadID) {
-      dispatch(reduxGetExistingThread(existingThreadID));
-      return;
-    }
-
-    if (!threadID && !isAnExistingThread) {
-      navigate("/search");
-    }
-  };
-
   useEffect(() => {
+    const initializeThread = () => {
+      // Existing thread means user opened a thread from the thread list not new threa
+
+      if (existingThreadID) {
+        dispatch(reduxGetExistingThread(existingThreadID));
+        return;
+      }
+
+      if (!threadID) {
+        navigate("/search");
+      }
+    };
+
     initializeThread();
 
     return () => {
       dispatch(clearThread());
     };
-  }, [existingThreadID]);
+  }, [dispatch, existingThreadID, navigate, threadID]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -120,7 +115,7 @@ const PageThread = () => {
 
       <form
         onSubmit={handleSubmit}
-        className="absolute left-1/2 -translate-x-1/2 bottom-3 z-50 w-[100svw]  max-w-4xl"
+        className="absolute left-1/2 -translate-x-1/2 bottom-3 z-50 w-[95svw]  max-w-4xl "
       >
         <ChatInput
           inputRef={inputRef}

@@ -1,15 +1,15 @@
 import { DUCKDUCKGO_API_URL } from "../config";
-import { SearchResults, SearchResultWebsite } from "../types";
+import { NewsResult, SearchResults, SearchResultWebsite } from "../types";
 
 export async function duckDuckGoSearch({
   query,
   maxResults,
   searchType,
-  withCrawling,
+  quickSearch,
 }: {
-  searchType?: string;
+  searchType?: "general" | "news";
   query: string;
-  withCrawling?: boolean;
+  quickSearch?: boolean;
   maxResults: number;
 }): Promise<SearchResults> {
   const apiUrl = DUCKDUCKGO_API_URL;
@@ -43,7 +43,7 @@ export async function duckDuckGoSearch({
       body: JSON.stringify(requestBody),
     });
 
-    const data: SearchResults = await response.json();
+    const resultData: SearchResults = await response.json();
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -52,6 +52,30 @@ export async function duckDuckGoSearch({
         `DuckDuckGo API error: ${response.status} ${response.statusText} - ${errorText}`
       );
     }
+
+    console.log(resultData);
+    const newsDataToWebsitesData = (
+      newsResults: NewsResult[]
+    ): SearchResultWebsite[] => {
+      return newsResults.map((n) => ({
+        title: n.title,
+        body: n.body,
+        href: n.url,
+        keywords: [],
+        summary: n.body,
+      }));
+    };
+
+    const data: SearchResults = {
+      image_results: resultData.image_results ?? [],
+      text_results:
+        searchType === "news" && resultData?.news_results
+          ? newsDataToWebsitesData(resultData.news_results)
+          : resultData.text_results,
+      video_results: resultData.video_results ?? [],
+    };
+
+    console.log(data);
 
     const resultsSimulation: SearchResultWebsite[] = [];
 

@@ -37,6 +37,7 @@ import AppSettings from "@/components/app/header/settings";
 import { useTour } from "@reactour/tour";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
 
 export default function AppSidebar({
   children,
@@ -48,6 +49,7 @@ export default function AppSidebar({
   children: ReactNode;
 }) {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const reducerChatHistory = useAppSelector(
     (state) => state.chat.reducerChatHistory
@@ -116,7 +118,7 @@ export default function AppSidebar({
   return (
     <div
       className={cn(
-        " flex flex-col md:flex-row-reverse bg-primary/20 w-full flex-1 mx-auto border border-white/20 overflow-hidden",
+        " flex flex-col md:flex-row-reverse bg-primary/20 w-full flex-1 mx-auto border border-white/20 overflow-hidden ",
         "h-[100svh]"
       )}
     >
@@ -163,6 +165,7 @@ export default function AppSidebar({
                         onClick={(event) => {
                           event.preventDefault();
 
+                          navigate("/search");
                           dispatch(reduxClearChatHistory());
                           setOpen(false);
                         }}
@@ -221,7 +224,9 @@ export default function AppSidebar({
                     <div>
                       <SidebarLink
                         link={{
-                          label: profile?.firstName + " " + profile?.lastName,
+                          label:
+                            user?.email ||
+                            profile?.firstName + " " + profile?.lastName,
                           href: "",
                           icon: (
                             <Avatar className="size-8">

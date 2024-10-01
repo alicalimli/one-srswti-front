@@ -5,6 +5,7 @@ export type SearchResults = {
   text_results: Array<SearchResultWebsite>;
   image_results: Array<SearchResultImage>;
   video_results: Array<SearchResultVideos>;
+  news_results?: Array<NewsResult>; // Added news_results type
 };
 
 export type SearchResultVideos = {
@@ -17,6 +18,15 @@ export type SearchResultVideos = {
   publisher: string;
   embed_url: string;
   images: { medium: string };
+};
+
+export type NewsResult = {
+  body: string;
+  date: string;
+  image: string;
+  source: string;
+  title: string;
+  url: string;
 };
 
 export type SearchResultImage = {

@@ -3,6 +3,7 @@ import React, { useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import { Link, LinkProps, useLocation } from "react-router-dom";
+import { Button } from "./button";
 
 interface Links {
   label: string;
@@ -113,16 +114,16 @@ export const MobileSidebar = ({
   return (
     <div
       className={cn(
-        "h-10 px-4 py-4 flex flex-row md:hidden  items-center justify-between bg-primary/20 w-full"
+        "flex flex-row md:hidden  items-center justify-between bg-primary/20 w-full z-[100]"
       )}
       {...props}
     >
-      <div className="flex justify-end z-20 w-full">
-        <IconMenu2
-          className="text-neutral-800 dark:text-neutral-200"
-          onClick={() => setOpen(!open)}
-        />
-      </div>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex justify-end z-20 w-auto fixed top-4 right-4 hover:bg-white/10 duration-200 rounded-[8px] p-1"
+      >
+        <IconMenu2 className="text-neutral-800 dark:text-neutral-200" />
+      </button>
       <AnimatePresence>
         {open && (
           <motion.div

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { removeSharedRequest, setSharedRequest } from "../slices/slice-shared";
 import { setChatReducerState } from "../slices/slice-user-threads";
 import { store } from "../store";
+import { clearThread } from "../slices/slice-thread";
 
 export const reduxGetChatHistory = () => async (dispatch: Dispatch) => {
   const currentUser = store.getState().user.user;
@@ -46,6 +47,7 @@ export const reduxClearChatHistory = () => async (dispatch: Dispatch) => {
     }
 
     dispatch(setChatReducerState({ reducerChatHistory: [] }));
+    dispatch(clearThread());
     toast.success("Chat history cleared");
   } catch (error) {
     console.error("Error clearing chat history:", error);

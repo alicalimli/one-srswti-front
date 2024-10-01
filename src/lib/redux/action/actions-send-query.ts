@@ -219,9 +219,13 @@ export const reduxSendQuery =
       if (!shouldContinue()) return;
 
       console.log("Performing DuckDuckGo search");
+      const searchType = focusMode && llmMode === "social" ? "news" : "general";
+
       const searchResults = await duckDuckGoSearch({
+        searchType,
+        quickSearch: false,
         query: transformed_query,
-        maxResults: focusMode ? 10 : 5,
+        maxResults: focusMode ? 1 : 1,
       });
       const resultContext = getStructuredResultContext(searchResults);
 
