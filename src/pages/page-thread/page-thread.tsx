@@ -57,7 +57,11 @@ const PageThread = ({}) => {
   return (
     <article className="w-full max-w-4xl mx-auto p-4 mt-6 ">
       <ThreadMessages messageGroups={messageGroups} />
-      {status === "generating" && <WritingSkeleton />}
+      {status === "generating" && (
+        <div className="mt-2">
+          <WritingSkeleton />
+        </div>
+      )}
 
       <form
         onSubmit={handleSubmit}

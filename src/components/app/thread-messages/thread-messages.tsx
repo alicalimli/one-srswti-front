@@ -26,44 +26,60 @@ const ThreadMessage = ({ messageGroup, groupIndex }: ThreadMessageProps) => {
   if (!messageGroup?.query) return <></>;
 
   return (
-    <Accordion
-      value={open}
-      onValueChange={(val) => setOpen(val)}
-      type="single"
-      collapsible
+    <motion.li
+      key={messageGroup?.id}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      layout
     >
-      <AccordionItem value={`item-1`}>
-        <AccordionTrigger className="text-2xl">
-          {messageGroup.query}
-        </AccordionTrigger>
-        <AccordionContent className="space-y-5">
-          {messageGroup.messages.map((message, messageIndex) => {
-            switch (message.role) {
-              case "knowledge-graph": {
-                if (typeof message.content === "string") return <></>;
+      {messageGroup?.type === "inquiry" && messageGroup?.inquiry ? (
+        <Copilot inquiry={messageGroup?.inquiry} id={messageGroup?.id} />
+      ) : (
+        <></>
+      )}
 
-                return (
-                  <SearchSection
-                    searchResults={message.content}
-                    query={messageGroup.transformedQuery}
-                    key={`message-${groupIndex}-${messageIndex}`}
-                  />
-                );
-              }
-              case "text":
-                return (
-                  <MarkdownMessage
-                    content={message.content as string}
-                    key={`message-${groupIndex}-${messageIndex}`}
-                  />
-                );
-              default:
-                return <></>;
-            }
-          })}
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+      {messageGroup?.query ? (
+        <Accordion
+          value={open}
+          onValueChange={(val) => setOpen(val)}
+          type="single"
+          collapsible
+        >
+          <AccordionItem value={`item-1`}>
+            <AccordionTrigger className="text-2xl">
+              {messageGroup.query}
+            </AccordionTrigger>
+            <AccordionContent className="space-y-5">
+              {messageGroup.messages.map((message, messageIndex) => {
+                switch (message.role) {
+                  case "knowledge-graph": {
+                    if (typeof message.content === "string") return <></>;
+
+                    return (
+                      <SearchSection
+                        searchResults={message.content}
+                        query={messageGroup.transformedQuery}
+                        key={`message-${groupIndex}-${messageIndex}`}
+                      />
+                    );
+                  }
+                  case "text":
+                    return (
+                      <MarkdownMessage
+                        content={message.content as string}
+                        key={`message-${groupIndex}-${messageIndex}`}
+                      />
+                    );
+                  default:
+                    return <></>;
+                }
+              })}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      ) : null}
+    </motion.li>
   );
 };
 
@@ -76,19 +92,11 @@ interface ThreadMessagesProps {
 const ThreadMessages = ({ messageGroups }: ThreadMessagesProps) => {
   const renderMessages = () => {
     return messageGroups.map((messageGroup, groupIndex) => (
-      <motion.li
-        key={messageGroup?.id}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        layout
-      >
-        <MemoizedThreadMessage
-          key={`thread-message-${groupIndex}`}
-          messageGroup={messageGroup}
-          groupIndex={groupIndex}
-        />
-      </motion.li>
+      <MemoizedThreadMessage
+        key={`thread-message-${groupIndex}`}
+        messageGroup={messageGroup}
+        groupIndex={groupIndex}
+      />
     ));
   };
 

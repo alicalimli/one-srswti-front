@@ -29,6 +29,11 @@ export type SearchResultImage = {
   source: string;
 };
 
+export type UpdateInquiriesType = {
+  id: string;
+  answers: { [key: string]: boolean };
+};
+
 export type SearchResultWebsite = {
   title: string;
   body: string;

@@ -1,9 +1,9 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { setSharedRequest, removeSharedRequest } from "../slices/slice-shared";
-import { appendThreadMessage, setThreadState } from "../slices/slice-thread";
+import { setThreadState } from "../slices/slice-thread";
 import { duckDuckGoSearch } from "@/lib/api/api-search";
 import { v4 as uuidv4 } from "uuid";
-import { ThreadMessageGroupType } from "@/lib/types";
+import { UpdateInquiriesType, ThreadMessageGroupType } from "@/lib/types";
 import { store } from "../store";
 import { transformUserQuery } from "@/lib/ai-agents/transform-user-query";
 import getSearchAnswer from "@/lib/ai-agents/get-search-answer";
@@ -42,15 +42,40 @@ const getUserAssitantMessages = (history: ThreadMessageGroupType[]) => {
     )
   );
 };
-
-const removeInquireBlocks = (
-  history: ThreadMessageGroupType[],
-  inquireIDS: string[]
-) => {
-  if (!inquireIDS?.length) {
-    return history;
+const updateInquireBlocks = ({
+  history,
+  updateInquiries,
+  hasSkipped,
+}: {
+  history: ThreadMessageGroupType[];
+  updateInquiries: UpdateInquiriesType[];
+  hasSkipped: boolean;
+  dispatch: Dispatch;
+}) => {
+  if (hasSkipped) {
+    return history.filter(
+      (group) =>
+        !updateInquiries.map((inquiry) => inquiry.id).includes(group.id)
+    );
   }
-  return history.filter((group) => !inquireIDS.includes(group.id));
+
+  const updatedHistory = history.map((group) => {
+    const inquiryUpdate = updateInquiries.find(
+      (inquiry) => inquiry.id === group.id
+    );
+    if (inquiryUpdate) {
+      return {
+        ...group,
+        messages: group.messages.map((message) => ({
+          ...message,
+          checkedAnswers: inquiryUpdate.answers,
+        })),
+      };
+    }
+    return group;
+  });
+
+  return updatedHistory;
 };
 
 let inquireCount = 0;
@@ -108,12 +133,12 @@ export const reduxSendQuery =
     query,
     messages,
     skipInquire,
-    inquireIDS,
+    updateInquiries,
   }: {
     query: string;
     skipInquire?: boolean;
     messages: ThreadMessageGroupType[];
-    inquireIDS?: string[];
+    updateInquiries?: UpdateInquiriesType[];
   }) =>
   async (dispatch: Dispatch) => {
     const currentThreadID = store.getState().thread?.id;
@@ -127,7 +152,14 @@ export const reduxSendQuery =
       dispatch(setThreadState({ id: threadID, status: "generating" }));
 
       let history = [...currentMessages, ...messages];
-      history = inquireIDS ? removeInquireBlocks(history, inquireIDS) : history;
+      history = updateInquiries?.length
+        ? updateInquireBlocks({
+            history,
+            dispatch,
+            updateInquiries,
+            hasSkipped: skipInquire || false,
+          })
+        : history;
 
       const historyContext = `
       Here's is the message history of the user and their query:

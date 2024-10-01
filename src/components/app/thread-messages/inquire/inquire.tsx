@@ -3,11 +3,9 @@ import { Card } from "@/components/ui/card";
 import { ChatFadeEnter } from "@/components/ui/chat-fade-enter";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
+import { useAppDispatch } from "@/lib/hooks/use-redux";
 import { reduxSendQuery } from "@/lib/redux/action/actions-thread";
-import { getReducerAppState } from "@/lib/redux/slices/slice-app-state";
 import { ThreadMessageGroupType } from "@/lib/types";
-import { useActions } from "ai/rsc";
 import { ArrowRight, Check, FastForward, Sparkles } from "lucide-react";
 import React, { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -15,9 +13,12 @@ import { v4 as uuidv4 } from "uuid";
 export interface InquiryType {
   question: string;
   userQuery: string;
+  completed?: boolean;
+  skipped?: boolean;
   choices: string[];
   allowsInput?: boolean;
   inputLabel?: string;
+  checkedOptions?: { [key: string]: boolean };
   inputPlaceholder?: string;
 }
 
@@ -32,13 +33,12 @@ export const Copilot: React.FC<CopilotProps> = ({
   id,
   inquiry,
 }: CopilotProps) => {
-  const [completed, setCompleted] = useState(false);
+  const [completed, setCompleted] = useState(inquiry.completed || false);
   const [query, setQuery] = useState("");
-  const [skipped, setSkipped] = useState(false);
+  const [skipped, setSkipped] = useState(inquiry.skipped || false);
   const [checkedOptions, setCheckedOptions] = useState<{
     [key: string]: boolean;
-  }>({});
-  const { isGenerating } = useAppSelector(getReducerAppState);
+  }>(inquiry?.checkedOptions || {});
 
   const error = "";
   const dispatch = useAppDispatch();
@@ -79,8 +79,6 @@ export const Copilot: React.FC<CopilotProps> = ({
     skip?: boolean
   ) => {
     e.preventDefault();
-
-    if (isGenerating) return;
 
     const formData = {
       selectedOptions: Object.entries(checkedOptions)
@@ -194,12 +192,7 @@ export const Copilot: React.FC<CopilotProps> = ({
               </div>
             )}
             <div className="flex justify-end space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleSkip}
-                disabled={false || isGenerating}
-              >
+              <Button type="button" variant="outline" onClick={handleSkip}>
                 <FastForward size={16} className="mr-1" />
                 Skip
               </Button>
