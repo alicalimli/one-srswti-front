@@ -25,6 +25,7 @@ import { LANGUAGES } from "@/lib/data/languages";
 import { NYU_SCHOOLS } from "@/lib/data/nyuSchools";
 import { NYU_MAJORS } from "@/lib/data/dataMajors";
 
+const MemoizedSelectContent = React.memo(SelectContent);
 const MemoizedMultiSelect = React.memo(MultiSelect);
 const MemoizedSelectItem = React.memo(SelectItem);
 
@@ -177,7 +178,7 @@ const Profile = () => {
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Preferred Language" />
               </SelectTrigger>
-              <SelectContent>
+              <MemoizedSelectContent>
                 <SelectGroup>
                   <SelectLabel>Languages</SelectLabel>
                   {memoizedLanguages.map((l) => (
@@ -186,7 +187,7 @@ const Profile = () => {
                     </MemoizedSelectItem>
                   ))}
                 </SelectGroup>
-              </SelectContent>
+              </MemoizedSelectContent>
             </Select>
           </div>
         </div>
@@ -216,7 +217,7 @@ const Profile = () => {
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="School" />
               </SelectTrigger>
-              <SelectContent>
+              <MemoizedSelectContent>
                 <SelectGroup>
                   <SelectLabel>Schools</SelectLabel>
                   {memoizedNyuSchools.map((school) => (
@@ -225,7 +226,7 @@ const Profile = () => {
                     </MemoizedSelectItem>
                   ))}
                 </SelectGroup>
-              </SelectContent>
+              </MemoizedSelectContent>
             </Select>
           ) : (
             <Input

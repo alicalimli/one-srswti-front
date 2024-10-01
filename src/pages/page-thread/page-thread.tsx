@@ -8,12 +8,24 @@ import { ThreadMessageGroupType } from "@/lib/types";
 import { useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate, useParams } from "react-router-dom";
-import { reduxGetExistingThread } from "@/lib/redux/action/actions-thread";
+import {
+  reduxBookmarkThread,
+  reduxGetExistingThread,
+} from "@/lib/redux/action/actions-thread";
+import { Button } from "@/components/ui/button";
+import { IconBookmark, IconBookmarkFilled } from "@tabler/icons-react";
+import ChatSharePublic from "./share-button";
 
 const PageThread = () => {
   const navigate = useNavigate();
 
-  const { id: threadID, messageGroups } = useAppSelector(getThreadState);
+  const {
+    bookmarked,
+    id: threadID,
+    shared,
+    messageGroups,
+  } = useAppSelector(getThreadState);
+
   const { threadID: existingThreadID } = useParams<{ threadID: string }>();
   const { status } = useAppSelector(getThreadState);
 
@@ -21,7 +33,9 @@ const PageThread = () => {
   const isAnExistingThread = !!existingThreadID;
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
+  const initializeThread = () => {
+    // Existing thread means user opened a thread from the thread list not new threa
+
     if (existingThreadID) {
       dispatch(reduxGetExistingThread(existingThreadID));
       return;
@@ -30,6 +44,10 @@ const PageThread = () => {
     if (!threadID && !isAnExistingThread) {
       navigate("/search");
     }
+  };
+
+  useEffect(() => {
+    initializeThread();
 
     return () => {
       dispatch(clearThread());
@@ -70,6 +88,27 @@ const PageThread = () => {
       {loading && (
         <div className="mt-4">
           <WritingSkeleton />
+        </div>
+      )}
+
+      {threadID && (
+        <div className="absolute flex items-center top-4 right-4 z-40">
+          <ChatSharePublic chatID={threadID} shared={shared} />
+
+          <Button
+            onClick={async () => {
+              await dispatch(reduxBookmarkThread());
+            }}
+            variant="ghost"
+            size="icon"
+            className="text-white/80 hover:text-white"
+          >
+            {bookmarked ? (
+              <IconBookmarkFilled className="w-5 h-5" />
+            ) : (
+              <IconBookmark className="w-5 h-5" />
+            )}
+          </Button>
         </div>
       )}
 

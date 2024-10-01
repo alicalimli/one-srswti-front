@@ -1,15 +1,15 @@
+import { ChatInput } from "@/components/app/chat-input/chat-input";
+import { ChatFadeEnter } from "@/components/ui/chat-fade-enter";
 import { LLM_MODES } from "@/lib/data/dataModes";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
-import { getUserState } from "@/lib/redux/slices/user";
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import { ChatFadeEnter } from "@/components/ui/chat-fade-enter";
-import { ChatInput } from "@/components/app/chat-input/chat-input";
-import { ChatPanelLogo } from "./chat-panel-logo";
-import { FormEncType, useNavigate } from "react-router-dom";
 import { reduxSendQuery } from "@/lib/redux/action/actions-send-query";
+import { getUserState } from "@/lib/redux/slices/user";
 import { ThreadMessageGroupType } from "@/lib/types";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import { ChatPanelLogo } from "./chat-panel-logo";
 
 export function ChatPanel() {
   const navigate = useNavigate();

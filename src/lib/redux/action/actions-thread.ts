@@ -1,14 +1,36 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { removeSharedRequest, setSharedRequest } from "../slices/slice-shared";
 import { supabase } from "@/lib/supabase/supabase";
-import { ThreadMessageGroupType } from "@/lib/types";
 import { setThreadState } from "../slices/slice-thread";
+import { store } from "../store";
+import { toast } from "sonner";
 
 export const reduxBookmarkThread = () => async (dispatch: Dispatch) => {
   dispatch(setSharedRequest("BOOKMARK_THREAD"));
   try {
-    console.log("reduxBookmarkThread action called");
-    // dispatch(bookmarkThread());
+    const state = store.getState();
+    const { id, bookmarked } = state.thread;
+    const userId = state.user.user?.id || "anonymous";
+
+    if (!id) {
+      throw new Error("Thread ID not found");
+    }
+
+    const { data, error } = await supabase
+      .from("one_srswti_threads")
+      .update({ bookmarked: !bookmarked })
+      .eq("id", id)
+      .eq("user_id", userId)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    dispatch(setThreadState({ bookmarked: !bookmarked }));
+    console.log(
+      `Thread ${bookmarked ? "unbookmarked" : "bookmarked"} successfully`
+    );
   } catch (error) {
     console.error("Error in reduxBookmarkThread:", error);
   } finally {
@@ -19,8 +41,29 @@ export const reduxBookmarkThread = () => async (dispatch: Dispatch) => {
 export const reduxShareThread = () => async (dispatch: Dispatch) => {
   dispatch(setSharedRequest("SHARE_THREAD"));
   try {
-    console.log("reduxShareThread action called");
-    // dispatch(shareThread());
+    const state = store.getState();
+    const { id, shared } = state.thread;
+    const userId = state.user.user?.id || "anonymous";
+
+    if (!id) {
+      throw new Error("Thread ID not found");
+    }
+
+    const { data, error } = await supabase
+      .from("one_srswti_threads")
+      .update({ shared: !shared })
+      .eq("id", id)
+      .eq("user_id", userId)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    dispatch(setThreadState({ shared: !shared }));
+    toast.success(
+      `Thread ${shared ? "Unpublished" : "published"} successfully`
+    );
   } catch (error) {
     console.error("Error in reduxShareThread:", error);
   } finally {

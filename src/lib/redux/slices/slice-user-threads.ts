@@ -3,12 +3,10 @@ import { Chat } from "../../types";
 import { RootState } from "../store";
 
 interface ChatState {
-  reducerChat: Chat | null;
   reducerChatHistory: Chat[];
 }
 
 const initialChatState: ChatState = {
-  reducerChat: null,
   reducerChatHistory: [],
 };
 

@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactTour from "@/components/app/react-tour/react-tour";
 import BootAnimation from "@/components/app/boot-animation/boot-animation";
@@ -11,14 +11,14 @@ interface AppLayoutProps {
 const AppLayout = ({ children }: AppLayoutProps) => {
   return (
     <div className="flex">
-      <BootAnimation>
-        <ReactTour>
+      <ReactTour>
+        <BootAnimation>
           <main className="flex flex-col h-[100svh] w-screen">
             <Header />
             <ScrollArea className="flex-grow">{children}</ScrollArea>
           </main>
-        </ReactTour>
-      </BootAnimation>
+        </BootAnimation>
+      </ReactTour>
     </div>
   );
 };
