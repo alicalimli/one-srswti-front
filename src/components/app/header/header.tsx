@@ -11,7 +11,6 @@ export const Header: React.FC = () => {
   const navigate = useNavigate();
 
   const { user, nyuStudent } = useAppSelector(getUserState);
-  const { isGenerating } = useAppSelector(getReducerAppState);
 
   const [showSignin, setShowSignin] = useState(false);
 
@@ -24,7 +23,6 @@ export const Header: React.FC = () => {
   return (
     <header className="w-full p-4 border-b border-white/10  z-50 flex items-center ">
       <button
-        disabled={isGenerating}
         onClick={() => navigate("/search")}
         className="duration-300 hover:opacity-50"
       >

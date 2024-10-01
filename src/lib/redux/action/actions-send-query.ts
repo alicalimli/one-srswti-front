@@ -4,7 +4,7 @@ import { appendThreadMessage, setThreadState } from "../slices/slice-thread";
 import { duckDuckGoSearch } from "@/lib/api/api-search";
 import { v4 as uuidv4 } from "uuid";
 import { UpdateInquiriesType, ThreadMessageGroupType } from "@/lib/types";
-import { store } from "../store";
+import { RootState, store } from "../store";
 import { transformUserQuery } from "@/lib/ai-agents/transform-user-query";
 import getSearchAnswer from "@/lib/ai-agents/get-search-answer";
 import { getStructuredResultContext } from "@/lib/utils/get-structured-result-context";
@@ -20,39 +20,29 @@ const getUserAssitantMessages = (history: ThreadMessageGroupType[]) => {
     )
   );
 };
-const updateInquireBlocks = ({
-  history,
+const updateInquireBlocks = async ({
   updateInquiries,
-  hasSkipped,
 }: {
-  history: ThreadMessageGroupType[];
   updateInquiries: UpdateInquiriesType[];
-  hasSkipped: boolean;
-  dispatch: Dispatch;
 }) => {
   console.log("Updating inquire blocks");
-  return history.filter(
-    (group) => !updateInquiries.map((inquiry) => inquiry.id).includes(group.id)
-  );
 
-  const updatedHistory = history.map((group) => {
-    const inquiryUpdate = updateInquiries.find(
-      (inquiry) => inquiry.id === group.id
-    );
-    if (inquiryUpdate) {
-      console.log(`Updating inquiry for group ${group.id}`);
-      return {
-        ...group,
-        messages: group.messages.map((message) => ({
-          ...message,
-          checkedAnswers: inquiryUpdate.answers,
-        })),
-      };
+  for (const inquiry of updateInquiries) {
+    try {
+      const { error } = await supabase
+        .from("one_srswti_thread_groups")
+        .update({ inquiry: inquiry.data })
+        .eq("id", inquiry.id);
+
+      if (error) {
+        console.error(`Error updating inquiry ${inquiry.id}:`, error);
+      } else {
+        console.log(`Successfully updated inquiry ${inquiry.id}`);
+      }
+    } catch (error) {
+      console.error(`Error updating inquiry ${inquiry.id}:`, error);
     }
-    return group;
-  });
-
-  return updatedHistory;
+  }
 };
 
 let inquireCount = 0;
@@ -143,8 +133,7 @@ export const reduxSendQuery =
     messages: Omit<ThreadMessageGroupType, "thread_id" | "user_id">[];
     updateInquiries?: UpdateInquiriesType[];
   }) =>
-  async (dispatch: Dispatch) => {
-    console.log("Starting reduxSendQuery");
+  async (dispatch: Dispatch, getState: () => RootState) => {
     const currentUser = store.getState().user?.user;
     const currentThreadID = store.getState().thread?.id;
     const currentMessages = store.getState().thread?.messageGroups;
@@ -161,6 +150,11 @@ export const reduxSendQuery =
     dispatch(setSharedRequest("SEND_QUERY"));
     dispatch(setThreadState({ id: threadID, status: "generating" }));
 
+    const shouldContinue = () => {
+      const currentState = getState();
+      return currentState.thread?.id === threadID;
+    };
+
     try {
       if (!currentThreadID) {
         console.log("Creating new thread in DB");
@@ -174,23 +168,23 @@ export const reduxSendQuery =
 
         if (error) {
           console.log("DB THREAD CREATION ERROR", error);
-          throw new Error("Coudn't create thread data in the db.");
+          throw new Error("Couldn't create thread data in the db.");
         }
       }
 
+      if (!shouldContinue()) return;
+
       const newMessages = [...messages];
       const overallMessages = [...currentMessages, ...newMessages];
-      // newMessages = updateInquiries?.length
-      //   ? updateInquireBlocks({
-      //       hitsory: newMessages,
-      //       dispatch,
-      //       updateInquiries,
-      //       hasSkipped: skipInquire || false,
-      //     })
-      //   : newMessages;
+
+      if (updateInquiries) {
+        updateInquireBlocks({
+          updateInquiries,
+        });
+      }
 
       const historyContext = `
-      Here's is the message history of the user and their query:
+      Here's the message history of the user and their query:
       ${JSON.stringify(getUserAssitantMessages(overallMessages))}
     `;
 
@@ -201,9 +195,12 @@ export const reduxSendQuery =
         threadID,
       });
 
+      if (!shouldContinue()) return;
+
       if (inquiryBlock) {
         console.log("Inquiry block created, appending to messages");
         newMessages.push(inquiryBlock);
+
         await insertMessagesToDB({ messages: newMessages });
         dispatch(appendThreadMessage(newMessages));
         return;
@@ -215,6 +212,8 @@ export const reduxSendQuery =
         historyContext,
       });
 
+      if (!shouldContinue()) return;
+
       console.log("Performing DuckDuckGo search");
       const searchResults = await duckDuckGoSearch({
         query: transformed_query,
@@ -222,8 +221,12 @@ export const reduxSendQuery =
       });
       const resultContext = getStructuredResultContext(searchResults);
 
+      if (!shouldContinue()) return;
+
       console.log("Getting search answer");
       const answer = await getSearchAnswer({ context: resultContext });
+
+      if (!shouldContinue()) return;
 
       const messageObject: ThreadMessageGroupType = {
         id: uuidv4(),
@@ -242,14 +245,23 @@ export const reduxSendQuery =
 
       console.log("Appending new message to thread");
       newMessages.push(messageObject);
-      await insertMessagesToDB({ messages: newMessages });
-      dispatch(appendThreadMessage(newMessages));
+
+      if (shouldContinue()) {
+        await insertMessagesToDB({ messages: newMessages });
+        dispatch(appendThreadMessage(newMessages));
+      }
     } catch (error) {
       console.error("Error in reduxSendQuery:", error);
-      dispatch(setThreadState({ status: "error" }));
+      if (shouldContinue()) {
+        dispatch(setThreadState({ status: "error" }));
+      }
     } finally {
       console.log("Finishing reduxSendQuery");
-      dispatch(setThreadState({ status: "idle" }));
-      dispatch(removeSharedRequest("SEND_QUERY"));
+      if (shouldContinue()) {
+        dispatch(setThreadState({ status: "idle" }));
+        dispatch(removeSharedRequest("SEND_QUERY"));
+      } else {
+        console.log("Thread changed or cleared. Skipping final state updates.");
+      }
     }
   };

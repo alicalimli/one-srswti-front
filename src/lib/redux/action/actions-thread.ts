@@ -100,6 +100,7 @@ export const reduxGetExistingThread =
         dispatch(
           setThreadState({
             messageGroups: data,
+            status: "idle",
             id: threadID,
             bookmarked: threadData.bookmarked,
             shared: threadData.shared,

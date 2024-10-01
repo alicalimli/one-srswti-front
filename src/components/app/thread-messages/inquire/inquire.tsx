@@ -23,13 +23,11 @@ export interface InquiryType {
 }
 
 export type CopilotProps = {
-  focusMode?: boolean;
   id: string;
   inquiry: InquiryType;
 };
 
 export const Copilot: React.FC<CopilotProps> = ({
-  focusMode = false,
   id,
   inquiry,
 }: CopilotProps) => {
@@ -94,7 +92,7 @@ export const Copilot: React.FC<CopilotProps> = ({
           skipInquire: true,
           query: inquiry.userQuery,
           messages: [],
-          inquireIDS: [{ id: id, answers: checkedOptions }],
+          updateInquiries: [{ id: id, data: { ...inquiry, skipped: true } }],
         })
       );
 
@@ -117,7 +115,7 @@ export const Copilot: React.FC<CopilotProps> = ({
           skipInquire: formData.skip,
           query: inquiry.userQuery,
           messages: [groupChat],
-          inquireIDS: [{ id: id, answers: checkedOptions }],
+          updateInquiries: [{ id: id, data: { ...inquiry, checkedOptions } }],
         })
       );
     }
@@ -140,10 +138,12 @@ export const Copilot: React.FC<CopilotProps> = ({
             </h5>
           </div>
         </Card>
-      ) : skipped ? null : completed ? (
+      ) : skipped || completed ? (
         <Card className="p-3 md:p-4 w-full flex rounded-[12px] justify-between items-center bg-primary/20 border border-white/20">
           <div className="flex items-center space-x-2 flex-1 min-w-0">
-            <h5 className="text-white/80 text-xs truncate">{updatedQuery()}</h5>
+            <h5 className="text-white/80 text-xs truncate">
+              {skipped ? "skipped" : updatedQuery()}
+            </h5>
           </div>
           <Check size={16} className="text-green-500 w-4 h-4" />
         </Card>

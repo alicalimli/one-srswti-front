@@ -28,9 +28,14 @@ const PageThread = () => {
 
   const { threadID: existingThreadID } = useParams<{ threadID: string }>();
   const { status } = useAppSelector(getThreadState);
+  const tr = useAppSelector(getThreadState);
 
   const dispatch = useAppDispatch();
   const isAnExistingThread = !!existingThreadID;
+
+  console.log(tr);
+  console.log(existingThreadID);
+
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const initializeThread = () => {
@@ -72,7 +77,6 @@ const PageThread = () => {
       dispatch(reduxSendQuery({ query: input.value, messages: [groupChat] }));
 
       setTimeout(() => {
-        navigate("/thread");
         input.value = "";
       }, 0);
     } catch (e) {
@@ -84,7 +88,9 @@ const PageThread = () => {
 
   return (
     <article className="w-full max-w-4xl mx-auto p-4 mt-6 ">
-      {status === "idle" && <ThreadMessages messageGroups={messageGroups} />}
+      {status !== "fetching" && (
+        <ThreadMessages messageGroups={messageGroups} />
+      )}
       {loading && (
         <div className="mt-4">
           <WritingSkeleton />

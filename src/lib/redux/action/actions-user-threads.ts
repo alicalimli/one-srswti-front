@@ -13,7 +13,8 @@ export const reduxGetChatHistory = () => async (dispatch: Dispatch) => {
     const { data: threads, error } = await supabase
       .from("one_srswti_threads")
       .select("*")
-      .eq("user_id", currentUser?.id || "anonymous");
+      .eq("user_id", currentUser?.id || "anonymous")
+      .order("created_at", { ascending: false });
 
     if (error) {
       throw new Error(error.message);

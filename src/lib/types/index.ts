@@ -31,7 +31,7 @@ export type SearchResultImage = {
 
 export type UpdateInquiriesType = {
   id: string;
-  answers: { [key: string]: boolean };
+  data: InquiryType;
 };
 
 export type SearchResultWebsite = {

@@ -4,11 +4,9 @@ import { cryptoDecryptData, cryptoEncryptData } from "./encoder-decoder";
 export const srswtiInference = async ({
   history = [],
   maxOutputTokens = 4096,
-  shouldFail,
 }: {
   history: { content: string; role: "assistant" | "user" }[];
   maxOutputTokens?: number;
-  shouldFail?: boolean;
 }) => {
   const raw = {
     ramanujanModel: "ramanujan-l2",
@@ -23,10 +21,6 @@ export const srswtiInference = async ({
     "https://router.srswti.com/ram/rinf",
   ];
   const makeRequest = async (encrypt) => {
-    if (shouldFail) {
-      throw new Error("error");
-    }
-
     const url = encrypt ? urls[0] : urls[1];
     const data = encrypt
       ? { encryptedData: cryptoEncryptData(JSON.stringify(raw)) }
@@ -56,7 +50,7 @@ export const srswtiInference = async ({
   };
 
   try {
-    return await makeRequest(true);
+    return await makeRequest(false);
   } catch (error) {
     console.error("Encrypted request failed:", error);
     try {
