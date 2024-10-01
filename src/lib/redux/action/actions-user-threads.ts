@@ -10,6 +10,8 @@ import {
   clearChats,
 } from "@/lib/actions/chat";
 import { Chat } from "@/lib/types";
+import { supabase } from "@/lib/supabase/supabase";
+import { store } from "../store";
 
 export const reduxGetChat =
   (chatId: string, userId: string = "anonymous") =>
@@ -98,59 +100,51 @@ export const reduxGetChat =
 //   dispatch(setChatReducerState({ reducerChat: null }));
 // };
 
-export const reduxGetChatHistory =
-  (userId: string = "anonymous") =>
-  async (dispatch: Dispatch) => {
-    dispatch(setSharedRequest("GET_CHAT_HISTORY"));
-    try {
-      const response = await fetch(`http://localhost:3000/api/chats/${userId}`);
+export const reduxGetChatHistory = () => async (dispatch: Dispatch) => {
+  const currentUser = store.getState().user.user;
 
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      const chats = await response.json();
+  dispatch(setSharedRequest("GET_CHAT_HISTORY"));
+  try {
+    const { data: threads, error } = await supabase
+      .from("one_srswti_threads")
+      .select("*")
+      .eq("user_id", currentUser?.id || "anonymous");
 
-      if (!chats) {
-        throw new Error("Chats not found");
-      }
-
-      // Convert Date objects to ISO strings
-      const serializedChats = chats.map((chat) => ({
-        ...chat,
-        createdAt:
-          chat.createdAt instanceof Date
-            ? chat.createdAt.toISOString()
-            : chat.createdAt,
-        updatedAt:
-          chat.updatedAt instanceof Date
-            ? chat.updatedAt.toISOString()
-            : chat.updatedAt,
-      }));
-
-      dispatch(setChatReducerState({ reducerChatHistory: serializedChats }));
-    } catch (error) {
-      console.error("Error fetching chat history:", error);
-      toast.error("Failed to load chat history");
-    } finally {
-      dispatch(removeSharedRequest("GET_CHAT_HISTORY"));
+    if (error) {
+      throw new Error(error.message);
     }
-  };
 
-// export const reduxClearChatHistory =
-//   (userId: string = "anonymous") =>
-//   async (dispatch: Dispatch) => {
-//     dispatch(setSharedRequest("CLEAR_CHAT_HISTORY"));
-//     try {
-//       const result = await clearChats(userId);
-//       if (result?.error) {
-//         throw new Error(result.error);
-//       }
-//       dispatch(setChatReducerState({ reducerChatHistory: [] }));
-//       toast.success("History cleared");
-//     } catch (error) {
-//       console.error("Error clearing chat history:", error);
-//       toast.error("Failed to clear chat history");
-//     } finally {
-//       dispatch(removeSharedRequest("CLEAR_CHAT_HISTORY"));
-//     }
-//   };
+    console.log(threads);
+
+    dispatch(setChatReducerState({ reducerChatHistory: threads }));
+  } catch (error) {
+    console.error("Error fetching thread history:", error);
+    toast.error("Failed to load thread history");
+  } finally {
+    dispatch(removeSharedRequest("GET_CHAT_HISTORY"));
+  }
+};
+
+export const reduxClearChatHistory = () => async (dispatch: Dispatch) => {
+  const currentUser = store.getState().user.user;
+
+  dispatch(setSharedRequest("CLEAR_CHAT_HISTORY"));
+  try {
+    const { error } = await supabase
+      .from("one_srswti_threads")
+      .delete()
+      .eq("user_id", currentUser?.id || "anonymous");
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    dispatch(setChatReducerState({ reducerChatHistory: [] }));
+    toast.success("Chat history cleared");
+  } catch (error) {
+    console.error("Error clearing chat history:", error);
+    toast.error("Failed to clear chat history");
+  } finally {
+    dispatch(removeSharedRequest("CLEAR_CHAT_HISTORY"));
+  }
+};

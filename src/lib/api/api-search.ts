@@ -65,7 +65,6 @@ export async function duckDuckGoSearch({
             summary_type: "balanced",
             keyword_count: 5,
           });
-          console.log("PAYLOAD", payload);
 
           let websiteWithSummary = null;
 

@@ -2,31 +2,39 @@ import { ChatInput } from "@/components/app/chat-input/chat-input";
 import ThreadMessages from "@/components/app/thread-messages/thread-messages";
 import { WritingSkeleton } from "@/components/app/writing-skeleton/writing-skeleton";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
-import { reduxSendQuery } from "@/lib/redux/action/actions-thread";
-import { getThreadState } from "@/lib/redux/slices/slice-thread";
+import { reduxSendQuery } from "@/lib/redux/action/actions-send-query";
+import { clearThread, getThreadState } from "@/lib/redux/slices/slice-thread";
 import { ThreadMessageGroupType } from "@/lib/types";
 import { useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { reduxGetExistingThread } from "@/lib/redux/action/actions-thread";
 
-const PageThread = ({}) => {
+const PageThread = () => {
   const navigate = useNavigate();
 
   const { id: threadID, messageGroups } = useAppSelector(getThreadState);
+  const { threadID: existingThreadID } = useParams<{ threadID: string }>();
   const { status } = useAppSelector(getThreadState);
+
   const dispatch = useAppDispatch();
+  const isAnExistingThread = !!existingThreadID;
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (!threadID) {
+    if (existingThreadID) {
+      dispatch(reduxGetExistingThread(existingThreadID));
+      return;
+    }
+
+    if (!threadID && !isAnExistingThread) {
       navigate("/search");
     }
 
-    // return () => {
-    //   dispatch(clearThread());
-    // };
-  }, []);
-
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+    return () => {
+      dispatch(clearThread());
+    };
+  }, [existingThreadID]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,7 +47,7 @@ const PageThread = ({}) => {
       const groupChat: ThreadMessageGroupType = {
         id: uuidv4(),
         query: "",
-        transformedQuery: "",
+        transformed_query: "",
         messages: [{ role: "user", content: input.value }],
       };
 
@@ -54,11 +62,13 @@ const PageThread = ({}) => {
     }
   }
 
+  const loading = status === "generating" || status === "fetching";
+
   return (
     <article className="w-full max-w-4xl mx-auto p-4 mt-6 ">
-      <ThreadMessages messageGroups={messageGroups} />
-      {status === "generating" && (
-        <div className="mt-2">
+      {status === "idle" && <ThreadMessages messageGroups={messageGroups} />}
+      {loading && (
+        <div className="mt-4">
           <WritingSkeleton />
         </div>
       )}

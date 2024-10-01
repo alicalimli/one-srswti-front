@@ -7,7 +7,7 @@ import { ChatFadeEnter } from "@/components/ui/chat-fade-enter";
 import { ChatInput } from "@/components/app/chat-input/chat-input";
 import { ChatPanelLogo } from "./chat-panel-logo";
 import { FormEncType, useNavigate } from "react-router-dom";
-import { reduxSendQuery } from "@/lib/redux/action/actions-thread";
+import { reduxSendQuery } from "@/lib/redux/action/actions-send-query";
 import { ThreadMessageGroupType } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
 
@@ -58,7 +58,7 @@ export function ChatPanel() {
       const groupChat: ThreadMessageGroupType = {
         query: "",
         id: uuidv4(),
-        transformedQuery: "",
+        transformed_query: "",
         messages: [{ role: "user", content: initialQuery }],
       };
 

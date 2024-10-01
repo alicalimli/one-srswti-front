@@ -42,12 +42,24 @@ export type SearchResultWebsite = {
   keywords?: string[];
 };
 
+export type ThreadType = {
+  id: string;
+  user_id: string;
+  created_at: Date;
+  messages: ThreadMessageGroupType[];
+  bookmarked: boolean;
+  title: string;
+  shared: boolean;
+};
+
 export type ThreadMessageGroupType = {
   id: string;
+  thread_id: string;
+  user_id: string;
   type?: "inquiry" | "default";
   inquiry?: InquiryType;
   query: string;
-  transformedQuery: string;
+  transformed_query: string;
   messages: ThreadMessage[];
 };
 

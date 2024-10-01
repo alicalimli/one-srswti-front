@@ -21,6 +21,7 @@ const AppRoutes = () => {
           }
         >
           <Route path="/thread" element={<PageThread />} />
+          <Route path="/thread/:threadID" element={<PageThread />} />
           <Route path="/search" element={<PageSearch />} />
           <Route path="/" element={<PageSearch />} />
         </Route>

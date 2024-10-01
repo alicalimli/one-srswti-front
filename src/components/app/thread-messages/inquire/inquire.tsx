@@ -4,7 +4,7 @@ import { ChatFadeEnter } from "@/components/ui/chat-fade-enter";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useAppDispatch } from "@/lib/hooks/use-redux";
-import { reduxSendQuery } from "@/lib/redux/action/actions-thread";
+import { reduxSendQuery } from "@/lib/redux/action/actions-send-query";
 import { ThreadMessageGroupType } from "@/lib/types";
 import { ArrowRight, Check, FastForward, Sparkles } from "lucide-react";
 import React, { useState } from "react";
@@ -94,7 +94,7 @@ export const Copilot: React.FC<CopilotProps> = ({
           skipInquire: true,
           query: inquiry.userQuery,
           messages: [],
-          inquireIDS: [id],
+          inquireIDS: [{ id: id, answers: checkedOptions }],
         })
       );
 
@@ -105,7 +105,7 @@ export const Copilot: React.FC<CopilotProps> = ({
       const groupChat: ThreadMessageGroupType = {
         query: "",
         id: uuidv4(),
-        transformedQuery: "",
+        transformed_query: "",
         messages: [
           { role: "assistant", content: inquiry.question },
           { role: "user", content: parseFormData(formData) },
@@ -117,7 +117,7 @@ export const Copilot: React.FC<CopilotProps> = ({
           skipInquire: formData.skip,
           query: inquiry.userQuery,
           messages: [groupChat],
-          inquireIDS: [id],
+          inquireIDS: [{ id: id, answers: checkedOptions }],
         })
       );
     }

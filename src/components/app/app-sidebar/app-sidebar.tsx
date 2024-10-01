@@ -1,5 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-redux";
 import {
+  reduxClearChatHistory,
   // reduxClearChatHistory,
   reduxGetChatHistory,
 } from "@/lib/redux/action/actions-user-threads";
@@ -84,21 +85,21 @@ export default function AppSidebar({
     const links = {
       bookmarks: bookmarks.map((c) => ({
         label: c.title,
-        href: c.path,
+        href: `/thread/${c.id}`,
         icon: (
           <IconStar className="text-neutral-700 dark:text-neutral-200 size-4 opacity-60 flex-shrink-0" />
         ),
       })),
       shared: shared.map((c) => ({
         label: c.title,
-        href: c.path,
+        href: `/thread/${c.id}`,
         icon: (
           <IconMessage className="text-neutral-700 dark:text-neutral-200 size-4 opacity-60 flex-shrink-0" />
         ),
       })),
       history: history.map((c) => ({
         label: c.title,
-        href: c.path,
+        href: `/thread/${c.id}`,
         icon: (
           <IconMessage className="text-neutral-700 dark:text-neutral-200 size-4 opacity-60 flex-shrink-0" />
         ),
@@ -162,7 +163,7 @@ export default function AppSidebar({
                         onClick={(event) => {
                           event.preventDefault();
 
-                          // dispatch(reduxClearChatHistory(user.id));
+                          dispatch(reduxClearChatHistory());
                           setOpen(false);
                         }}
                       >

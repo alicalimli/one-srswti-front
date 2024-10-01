@@ -59,7 +59,7 @@ const ThreadMessage = ({ messageGroup, groupIndex }: ThreadMessageProps) => {
                     return (
                       <SearchSection
                         searchResults={message.content}
-                        query={messageGroup.transformedQuery}
+                        query={messageGroup.transformed_query}
                         key={`message-${groupIndex}-${messageIndex}`}
                       />
                     );

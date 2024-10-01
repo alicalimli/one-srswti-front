@@ -4,17 +4,17 @@ import { ThreadMessageGroupType } from "@/lib/types";
 
 interface ThreadState {
   messageGroups: ThreadMessageGroupType[];
-  isBookmarked: boolean;
-  isPublic: boolean;
   id: string | null;
-  status: "idle" | "generating" | "success" | "error";
+  bookmarked: boolean;
+  shared: boolean;
+  status: "idle" | "fetching" | "generating" | "success" | "error";
 }
 
 const initialThreadState: ThreadState = {
   messageGroups: [],
-  isBookmarked: false,
   id: null,
-  isPublic: false,
+  bookmarked: false,
+  shared: false,
   status: "idle",
 };
 
