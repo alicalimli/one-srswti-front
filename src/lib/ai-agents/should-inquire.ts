@@ -1,10 +1,16 @@
 import { srswtiInference } from "../api/api-ai";
+import { getLLMode, LLMModeId } from "../data/dataModes";
 
 interface ShouldInquireProps {
   context: string;
+  llmMode?: LLMModeId | null;
 }
 
-const shouldInquire = async ({ context }: ShouldInquireProps) => {
+const shouldInquire = async ({ context, llmMode }: ShouldInquireProps) => {
+  const llmModeData = llmMode ? getLLMode(llmMode) : null;
+
+  console.log("LLMMODE", llmModeData);
+
   const prompt = `
       You are a professional writer tasked with generating concise, informative answers. Follow these guidelines:
 
@@ -27,6 +33,17 @@ const shouldInquire = async ({ context }: ShouldInquireProps) => {
       }
 
       "${context}"
+
+      ${
+        llmModeData
+          ? `
+        When crafting your inquiry, consider the user's selected focus mode:
+        - ${llmModeData.title}: ${llmModeData.inquire}
+
+        The user is currently using ${llmModeData.title} mode.
+      `
+          : ""
+      }
     `;
 
   try {

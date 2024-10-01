@@ -58,17 +58,19 @@ const checkInquiry = async ({
   skipInquire?: boolean;
   threadID: string;
 }) => {
-  console.log("Checking inquiry");
   const currentUser = store.getState().user?.user;
+  const llmMode = store.getState().appState.activeMode;
+  const focusMode = store.getState().appState.focusMode;
 
-  const maxInquiries = 3;
-  console.log(inquireCount);
+  const maxInquiries = focusMode ? 5 : 3;
+
   const shouldRenderInquire:
     | { choices: string[]; question: string }
     | "proceed" =
-    inquireCount <= maxInquiries
+    inquireCount < maxInquiries
       ? await shouldInquire({
           context: historyContext,
+          llmMode: focusMode ? llmMode : null,
         })
       : "proceed";
 
@@ -134,11 +136,13 @@ export const reduxSendQuery =
     updateInquiries?: UpdateInquiriesType[];
   }) =>
   async (dispatch: Dispatch, getState: () => RootState) => {
-    const currentUser = store.getState().user?.user;
-    const currentThreadID = store.getState().thread?.id;
-    const currentMessages = store.getState().thread?.messageGroups;
+    const currentUser = getState().user?.user;
+    const currentThreadID = getState().thread?.id;
+    const currentMessages = getState().thread?.messageGroups;
+    const focusMode = store.getState().appState.focusMode;
+    const llmMode = store.getState().appState.activeMode;
 
-    const threadID = currentThreadID || uuidv4();
+    const threadID = currentThreadID ?? uuidv4();
 
     const messages = messagesToInsert.map((message) => ({
       ...message,
@@ -217,14 +221,17 @@ export const reduxSendQuery =
       console.log("Performing DuckDuckGo search");
       const searchResults = await duckDuckGoSearch({
         query: transformed_query,
-        maxResults: 5,
+        maxResults: focusMode ? 10 : 5,
       });
       const resultContext = getStructuredResultContext(searchResults);
 
       if (!shouldContinue()) return;
 
       console.log("Getting search answer");
-      const answer = await getSearchAnswer({ context: resultContext });
+      const answer = await getSearchAnswer({
+        llmMode: focusMode ? llmMode : null,
+        context: resultContext,
+      });
 
       if (!shouldContinue()) return;
 
@@ -257,6 +264,7 @@ export const reduxSendQuery =
       }
     } finally {
       console.log("Finishing reduxSendQuery");
+
       if (shouldContinue()) {
         dispatch(setThreadState({ status: "idle" }));
         dispatch(removeSharedRequest("SEND_QUERY"));

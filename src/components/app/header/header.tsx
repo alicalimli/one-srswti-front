@@ -21,7 +21,7 @@ export const Header: React.FC = () => {
   }, [user]);
 
   return (
-    <header className="w-full p-4 border-b border-white/10  z-50 flex items-center ">
+    <header className="w-full p-4 border-b border-white/10 flex items-center ">
       <button
         onClick={() => navigate("/search")}
         className="duration-300 hover:opacity-50"

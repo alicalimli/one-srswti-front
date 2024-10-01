@@ -7,6 +7,8 @@ async function transformUserQuery({
   query: string;
   historyContext: string;
 }): Promise<string> {
+  const currentDate = new Date().toLocaleString();
+
   const prompt = `
     As an expert search query optimizer, your task is to craft the perfect search query based on the user's current query and the conversation history. This optimized query will be used to research the internet and provide the user with precise, relevant information.
 
@@ -20,6 +22,8 @@ async function transformUserQuery({
     7. Format the query to maximize relevance in search engine results.
 
     Your response should be ONLY the optimized search query, without any explanation or double quotes.
+
+    Current date and time: '${currentDate}
 
     Current Query: "${query}"
 
